@@ -990,9 +990,9 @@
         };
 
         renderList("education-section", educationData, i => `<article class="details-item"><i class="fa-solid fa-school details-icon"></i><div><h4>${i.degree}</h4><small>${i.duration}</small><h5>${i.institute}</h5><small>${i.description}</small></div></article>`);
-        renderList("certification-section", certificationData, i => `<article class="details-item"><i class="fa-solid fa-certificate details-icon"></i><div><h4>${i.name}</h4><small>${i.description}</small> <a target="_blank" href=${i.link}> 🔗</a> </div></article>`);
+        renderList("certification-section", certificationData, i => `<article class="details-item"><i class="fa-solid fa-certificate details-icon"></i><div><h4>${i.name}</h4><small>${i.description}</small> <a href=${i.link} class="btn" target="_blank"> 🔗</a> </div></article>`);
         renderList("work-history", experienceData, i => `<article class="details-item"><i class="fa-solid fa-industry details-icon"></i><div><h4>${i.name}</h4><small>${i.duration}</small><h5>${i.institute}</h5></div></article>`);
-        renderList("project-list", projectData, i => `<article class="details-item"><i class="fa-solid fa-file-lines details-icon"></i><div><h4>${i.name}</h4><small>${i.details}</small><br><a href="${i.link}" class="btn" style="padding: 0.2rem 0.5rem; margin-top:0.5rem;" target="_blank">View Publication</a></div></article>`);
+        renderList("project-list", projectData, i => `<article class="details-item"><i class="fa-solid fa-file-lines details-icon"></i><div><h4>${i.name}</h4><small>${i.details}</small> <a href="${i.link}" class="btn" target="_blank">📰</a></div></article>`);
         renderList("civil-skills", civilSkills, i => `<article class="details-item"><i class="fa-solid fa-circle-check details-icon"></i><div><h4>${i.name}</h4><small>${i.type}</small></div></article>`);
         renderList("web-skills", webSkills, i => `<article class="details-item"><i class="fa-solid fa-circle-check details-icon"></i><div><h4>${i.name}</h4><small>${i.type}</small></div></article>`);
 
