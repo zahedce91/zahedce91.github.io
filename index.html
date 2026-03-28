@@ -570,6 +570,7 @@
             color: var(--color-bg);
             border-color: var(--color-bg);
         }
+
         .footer__copyright {
             color: var(--color-bg);
             margin-bottom: 4rem;
@@ -657,7 +658,8 @@
             </div>
 
             <div class="me">
-                <img src="https://zahed.ffkenterprise.com/static/media/me.2fba0cc066d79039bef5.png" alt="Md. Zahed Hossain" />
+                <img src="https://zahed.ffkenterprise.com/static/media/me.2fba0cc066d79039bef5.png"
+                    alt="Md. Zahed Hossain" />
             </div>
 
             <a href="#contact" class="scroll__down">Scroll Down</a>
@@ -938,8 +940,8 @@
         const educationData = [
             { degree: 'M.Sc. in Civil Engineering', duration: 'April 2023 - Present', institute: 'Bangladesh University of Engineering & Technology (BUET)', description: 'Major: Transportation Engineering' },
             { degree: 'B.Sc. in Civil Engineering', duration: 'Feb 2016 - April 2022', institute: 'Khulna University of Engineering & Technology (KUET)', description: 'Thesis Major: Water Resource | CGPA: 3.78/4.00' },
-            { degree: 'H.S.C.', duration: 'April 2014 - Feb 2016', institute: 'Govt. Haji Mohammad Mohsin College', description: 'Group: Science | GPA: 5.00/5.00' },
-            { degree: 'S.S.C.', duration: '2014', institute: 'Chakaria Korak Biddyapith', description: 'Group: Science | GPA: 5.00/5.00' }
+            { degree: 'Higher Secondary Certificate (H.S.C.)', duration: 'April 2014 - Feb 2016', institute: 'Govt. Haji Mohammad Mohsin College', description: 'Group: Science | GPA: 5.00/5.00' },
+            { degree: 'Secondary School Certificate (S.S.C.)', duration: '2014', institute: 'Chakaria Korak Biddyapith', description: 'Group: Science | GPA: 5.00/5.00' }
         ];
 
         const certificationData = [
@@ -956,9 +958,10 @@
         ];
 
         const projectData = [
-            { name: 'Identifying groundwater recharge potential zones...', details: 'AIP Conf. Proc. 2713 (1): 050001 (2023).', link: 'https://doi.org/10.1063/5.0129774' },
-            { name: 'Flood Susceptibility Assessment...', details: 'AHP-GIS Based Approach (2022).', link: 'https://www.researchgate.net/' },
-            { name: 'Undergraduate Thesis', details: 'Groundwater recharge potential zoning in the Barind Tract.', link: '#' }
+            { name: 'Integrated Geospatial and Analytical Hierarchy Process Approach for Assessing Sustainable Management of Groundwater Recharge Potential in Barind Tract', details: 'Water, 16(20), 2918 (2024).', link: 'https://doi.org/10.3390/w16202918' },
+            { name: 'Identifying groundwater recharge potential zones in Barind tract of Bangladesh using geospatial technique', details: 'AIP Conf. Proc. 2713 (1): 050001 (2023).', link: 'https://doi.org/10.1063/5.0129774' },
+            { name: 'Flood Susceptibility Assessment in Southwest Coastal Region of Bangladesh Using an AHP-GIS Based Approach', details: 'Springer, 368(1), 73 (2022).', link: 'https://doi.org/10.1007/978-981-99-3826-1_7' },
+            { name: 'Undergraduate Thesis', details: 'Groundwater recharge potential zoning in the Barind Tract of Bangladesh', link: '#' }
         ];
 
         const civilSkills = [
@@ -987,7 +990,7 @@
         renderList("web-skills", webSkills, i => `<article class="details-item"><i class="fa-solid fa-circle-check details-icon"></i><div><h4>${i.name}</h4><small>${i.type}</small></div></article>`);
 
         /*================ SOCIAL LINKS (DEFINE ONCE) ================*/
-       
+
         const socialLinks = [
             { url: "https://www.linkedin.com/in/zahedce91", icon: "fa-brands fa-linkedin" },
             { url: "https://www.researchgate.net/profile/Md-Hossain-389", icon: "fa-brands fa-researchgate" },
