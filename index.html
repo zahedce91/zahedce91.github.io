@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Md. Zahed Hossain | Portfolio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;1,300&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+    <style>
+        /*================ GLOBAL STYLES (Restored & Optimized) ================*/
+        :root {
+            --color-bg: #1f1f38;
+            --color-bg-variant: #2c2c6c;
+            --color-primary: #4db5ff;
+            --color-primary-variant: rgba(77, 181, 255, 0.4);
+            --color-white: #fff;
+            --color-light: rgba(255, 255, 255, 0.6);
+            --transition: all 400ms ease;
+            --container-width-lg: 76%;
+            --container-width-md: 86%;
+            --container-width-sm: 90%;
+        }
+
+        .light-mode {
+            --color-bg: #8FE3CF;
+            --color-bg-variant: #c5f0e6;
+            --color-primary: #27aa06;
+            --color-primary-variant: rgba(5, 95, 10, 0.2);
+            --color-white: #0443f0;
+            --color-light: #021e6d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            box-sizing: border-box;
+            list-style: none;
+            text-decoration: none;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-white);
+            line-height: 1.7;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKcWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuZGFiYWNiYiwgMjAyMS8wNC8xNC0wMDozOTo0NCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdEV2dD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlRXZlbnQjIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIyLjQgKFdpbmRvd3MpIiB4bXA6Q3JlYXRlRGF0ZT0iMjAyMi0wMS0xN1QxODo0NzozMVoiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjItMDEtMTlUMTA6NDE6MzBaIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0wMS0xOVQxMDo0MTozMFoiIGRjOmZvcm1hdD0iaW1hZ2UvcG5nIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjRkZmE3YzdlLTljMjMtZGY0NS1hNjE3LTI1ZmIxN2MwYzI2YiIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjQ1NzM3ODMzLTZkNDMtZTU0Yy05ZGJlLTkzM2ZjN2QyNWQ2MSIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOmFkZWMyZmNmLTBlN2MtYmY0NC04MjdhLTYyN2IxOTdkODg1ZiIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB0aWZmOk9yaWVudGF0aW9uPSIxIiB0aWZmOlhSZXNvbHV0aW9uPSI3MjAwMDAvMTAwMDAiIHRpZmY6WVJlc29sdXRpb249IjcyMDAwMC8xMDAwMCIgdGlmZjpSZXNvbHV0aW9uVW5pdD0iMiIgZXhpZjpDb2xvclNwYWNlPSIxIiBleGlmOlBpeGVsWERpbWVuc2lvbj0iMTYiIGV4aWY6UGl4ZWxZRGltZW5zaW9uPSIxNiI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6YWRlYzJmY2YtMGU3Yy1iZjQ0LTgyN2EtNjI3YjE5N2Q4ODVmIiBzdEV2dDp3aGVuPSIyMDIyLTAxLTE3VDE4OjQ3OjMxWiIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIyLjQgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDphMTc3MmY0ZS1jZGNkLTcyNDYtYjYyNi1kNzRlNWQxMGZiYmQiIHN0RXZ0OndoZW49IjIwMjItMDEtMThUMTc6MjBaIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuNCAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmJkMmQ3ZDMyLTU2YWEtNTY0OS04NDdmLTBmMWYzZThmMGJkYiIgc3RFdnQ6d2hlbj0iMjAyMi0wMS0xOVQxMDo0MTozMFoiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMi40IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY29udmVydGVkIiBzdEV2dDpwYXJhbWV0ZXJzPSJmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJkZXJpdmVkIiBzdEV2dDpwYXJhbWV0ZXJzPSJjb252ZXJ0ZWQgZnJvbSBhcHBsaWNhdGlvbi92bmQuYWRvYmUucGhvdG9zaG9wIHRvIGltYWdlL3BuZyIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NGRmYTdjN2UtOWMyMy1kZjQ1LWE2MTctMjVmYjE3YzBjMjZiIiBzdEV2dDp3aGVuPSIyMDIyLTAxLTE5VDEwOjQxOjMwWiIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIyLjQgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDwvcmRmOlNlcT4gPC94bXBNTTpIaXN0b3J5PiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpiZDJkN2QzMi01NmFhLTU2NDktODQ3Zi0wZjFmM2U4ZjBiZGIiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpiNTQwNjllOC1iYmI1LWJhNGYtOGQ0Ny1kMWM2OWIwZDEwNDQiIHN0UmVmOm9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDphZGVjMmZjZi0wZTdjLWJmNDQtODI3YS02MjdiMTk3ZDg4NWYiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7hJkGIAAAAgUlEQVQ4jaWTSwqAMAwFxxp15ff+VxQ/O1GsGwUpttr4IMuZFJqHMUIglWSFWGvxjQnADdBu67KFNvgE9TmveRLU5/ZPcQVRsCuIhu8CFQwgQAeUGvh6QaKFL0EPTH8EAKNWcv8FlcS9g2jJ0yVGSXxdGIH5iyDU5QHYU8kF8DbyAFHyKD3LdWDGAAAAAElFTkSuQmCC');
+        }
+
+        .container {
+            width: var(--container-width-lg);
+            margin: 0 auto;
+        }
+
+        section {
+            margin-top: 4rem;
+        }
+
+        section>h5 {
+            text-align: center;
+            color: var(--color-light);
+            font-weight: 400;
+        }
+
+        section>h2 {
+            text-align: center;
+            color: var(--color-primary);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .btn {
+            width: max-content;
+            display: inline-block;
+            color: var(--color-primary);
+            padding: 0.75rem 1.2rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            border: 1px solid var(--color-primary);
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background: var(--color-white);
+            color: var(--color-bg);
+            border-color: transparent;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: var(--color-bg);
+        }
+
+        img {
+            display: block;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        /*================ ANIMATION PROPERTY ================*/
+        @property --rotate {
+            syntax: "<angle>";
+            initial-value: 132deg;
+            inherits: false;
+        }
+
+        @keyframes spin {
+            0% {
+                --rotate: 0deg;
+            }
+
+            100% {
+                --rotate: 360deg;
+            }
+        }
+
+        .animated {
+            background: linear-gradient(var(--rotate), var(--color-bg), var(--color-bg-variant), var(--color-primary-variant)) !important;
+            animation: spin 2.5s linear infinite;
+        }
+
+        /*================ HEADER ================*/
+        header {
+            height: 100vh;
+            padding-top: 5rem;
+            overflow: hidden;
+        }
+
+        .header__container {
+            text-align: center;
+            height: 100%;
+            position: relative;
+        }
+
+        .cta {
+            margin-top: 2.5rem;
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+        }
+
+        .header__socials {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            position: absolute;
+            left: 0;
+            bottom: 3rem;
+        }
+
+        .header__socials a {
+            color: var(--color-primary);
+        }
+
+        .header__socials::after {
+            content: "";
+            width: 1px;
+            height: 2rem;
+            background: var(--color-primary);
+        }
+
+        .me {
+            background: linear-gradient(var(--color-primary), transparent);
+            width: 22rem;
+            height: 30rem;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 4rem;
+            border-radius: 12rem 12rem 0 0;
+            overflow: hidden;
+            padding: 5rem 1.5rem 1.5rem;
+        }
+
+        .scroll__down {
+            color: var(--color-primary);
+            position: absolute;
+            right: -2.3rem;
+            bottom: 5rem;
+            transform: rotate(90deg);
+            font-weight: 300;
+            font-size: 0.9rem;
+        }
+
+        /*================ NAVIGATION ================*/
+        nav {
+            background: rgba(0, 0, 0, 0.3);
+            width: max-content;
+            padding: 0.7rem 1.7rem;
+            z-index: 5;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 2rem;
+            display: flex;
+            gap: 0.8rem;
+            border-radius: 3rem;
+            backdrop-filter: blur(15px);
+        }
+
+        nav a {
+            background: transparent;
+            padding: 0.9rem;
+            border-radius: 50%;
+            display: flex;
+            color: var(--color-light);
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--color-white);
+        }
+
+        nav a.active {
+            background: var(--color-primary);
+            color: var(--color-bg);
+        }
+
+        .theme-changer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 0.8rem;
+            z-index: 5;
+            position: fixed;
+            top: 5%;
+            right: 5%;
+            border-radius: 3rem;
+            cursor: pointer;
+            color: var(--color-primary);
+        }
+
+        /*================ ABOUT ================*/
+        .about__container {
+            display: grid;
+            grid-template-columns: 35% 50%;
+            gap: 15%;
+        }
+
+        .about__me {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 2rem;
+            background: linear-gradient(45deg, transparent, var(--color-primary), transparent);
+            display: grid;
+            place-items: center;
+        }
+
+        .about__me-image {
+            border-radius: 2rem;
+            overflow: hidden;
+            transform: rotate(10deg);
+            transition: var(--transition);
+        }
+
+        .about__me-image:hover {
+            transform: rotate(0);
+        }
+
+        .about__cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .about__card {
+            background: var(--color-bg-variant);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .about__card:hover {
+            background: transparent;
+            border-color: var(--color-primary-variant);
+        }
+
+        .about__icon {
+            color: var(--color-primary);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .about__content p {
+            text-align: justify;
+            margin: 2rem 0 2.6rem;
+            color: var(--color-light);
+        }
+
+        /*================ GRID BLOCKS (Education, Experience, Skills) ================*/
+        .grid-one {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .grid-two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .info-block {
+            background: var(--color-bg-variant);
+            padding: 1rem 2rem;
+            border-radius: 2rem;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .info-block:hover {
+            background: transparent;
+            border-color: var(--color-primary-variant);
+        }
+
+        .info-block h3 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+        }
+
+        .details-item {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 1rem;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .details-item:hover {
+            background: var(--color-bg-variant);
+            border-color: var(--color-primary-variant);
+        }
+
+        .details-icon {
+            margin-top: 6px;
+            color: var(--color-primary);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        /*================ SERVICES ================*/
+        .service__container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .service {
+            background: var(--color-bg-variant);
+            border-radius: 0 0 2rem 2rem;
+            border: 1px solid var(--color-primary);
+            transition: var(--transition);
+        }
+
+        .service:hover {
+            background: transparent;
+            border-color: var(--color-primary-variant);
+        }
+
+        .service__head {
+            background: var(--color-primary);
+            padding: 2rem;
+            border-radius: 0 0 2rem 2rem;
+            box-shadow: 0 2rem 1rem rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .service__head h3 {
+            color: var(--color-bg);
+            font-size: 1rem;
+        }
+
+        .service__list {
+            padding: 2rem;
+        }
+
+        .service__list li {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .service__list-icon {
+            color: var(--color-primary);
+            margin-top: 2px;
+        }
+
+        /*================ PORTFOLIO ================*/
+        .portfolio__item {
+            background: var(--color-bg-variant);
+            padding: 1.2rem;
+            border-radius: 2rem;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .portfolio__item:hover {
+            border-color: var(--color-primary-variant);
+            background: transparent;
+        }
+
+        .portfolio__item-image {
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .portfolio__item-image:hover {
+            transform: scale(1.05);
+        }
+
+        .portfolio__item h3 {
+            margin: 1.2rem 0 1rem;
+        }
+
+        .portfolio__item-cta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /*================ TESTIMONIALS ================*/
+        .testimonial__container {
+            width: 40% !important;
+            padding-bottom: 4rem;
+        }
+
+        .testimonial {
+            background: var(--color-bg-variant);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 2rem;
+        }
+
+        .client__avatar {
+            width: 4rem;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 0.4rem solid var(--color-primary-variant);
+        }
+
+        .client__review {
+            color: var(--color-light);
+            font-weight: 300;
+            display: block;
+            width: 80%;
+            margin: 0.8rem auto 0;
+        }
+
+        /*================ CONTACT ================*/
+        .contact__container {
+            width: 58%;
+            display: grid;
+            grid-template-columns: 30% 58%;
+            gap: 12%;
+        }
+
+        .contact__option {
+            background: var(--color-bg-variant);
+            padding: 1.2rem;
+            border-radius: 1.2rem;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: var(--transition);
+            margin-bottom: 1.2rem;
+        }
+
+        .contact__option:hover {
+            background: transparent;
+            border-color: var(--color-primary-variant);
+        }
+
+        .contact__option i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+            display: block;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            background: transparent;
+            border: 2px solid var(--color-primary-variant);
+            color: var(--color-white);
+            resize: none;
+        }
+
+        /*================ FOOTER ================*/
+        footer {
+            background: var(--color-primary);
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--color-bg);
+            margin-top: 7rem;
+        }
+
+        footer a {
+            color: var(--color-bg);
+        }
+
+        .footer__logo {
+            width: 8rem;
+            margin: 0 auto 1rem;
+        }
+
+        .permalinks {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer__socials {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer__socials a {
+            background: var(--color-bg);
+            color: var(--color-primary);
+            padding: 0.8rem;
+            border-radius: 0.7rem;
+            display: flex;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .footer__socials a:hover {
+            background: transparent;
+            color: var(--color-bg);
+            border-color: var(--color-bg);
+        }
+        .footer__copyright {
+            color: var(--color-bg);
+            margin-bottom: 4rem;
+        }
+
+        /*================ RESPONSIVE ================*/
+        @media screen and (max-width: 1024px) {
+            .container {
+                width: var(--container-width-md);
+            }
+
+            .about__container {
+                grid-template-columns: 1fr;
+            }
+
+            .about__me {
+                width: 50%;
+                margin: 2rem auto 4rem;
+            }
+
+            .grid-two,
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact__container {
+                grid-template-columns: 1fr;
+                width: var(--container-width-md);
+            }
+
+            .testimonial__container {
+                width: 60% !important;
+            }
+        }
+
+        @media screen and (max-width: 600px) {
+            header {
+                height: 100vh;
+            }
+
+            .header__socials,
+            .scroll__down {
+                display: none;
+            }
+
+            .about__cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .service__container {
+                grid-template-columns: 1fr;
+            }
+
+            .testimonial__container {
+                width: var(--container-width-sm) !important;
+            }
+        }
+    </style>
+
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>(function () { emailjs.init("1LeLhzokHVsGO6EYA"); })();</script>
+</head>
+
+<body>
+    <div class="theme-changer" title="Theme Changer" onclick="document.body.classList.toggle('light-mode')">
+        <i class="fa-solid fa-moon"></i>
+    </div>
+
+    <header id="header">
+        <div class="container header__container">
+            <h5>Hello I am</h5>
+            <h1>Md. Zahed Hossain</h1>
+            <h5 class="text-light">
+                <div class="typewriter">
+                    <span id="typewriter"></span><span class="typewriter__cursor">|</span>
+                </div>
+            </h5>
+
+            <div class="cta">
+                <a href="#" class='btn'>Download CV</a>
+                <a href='#contact' class='btn btn-primary'>Let's Talk</a>
+            </div>
+
+            <div class="header__socials" id="header__socials">
+            </div>
+
+            <div class="me">
+                <img src="https://zahed.ffkenterprise.com/static/media/me.2fba0cc066d79039bef5.png" alt="Md. Zahed Hossain" />
+            </div>
+
+            <a href="#contact" class="scroll__down">Scroll Down</a>
+        </div>
+    </header>
+
+    <nav id="navbar">
+        <a href="#header" class="active"><i class="fa-solid fa-house"></i></a>
+        <a href="#about"><i class="fa-solid fa-user"></i></a>
+        <a href="#education"><i class="fa-solid fa-graduation-cap"></i></a>
+        <a href="#experience"><i class="fa-solid fa-book"></i></a>
+        <a href="#services"><i class="fa-solid fa-briefcase"></i></a>
+        <a href="#contact"><i class="fa-solid fa-envelope"></i></a>
+    </nav>
+
+    <section id='about'>
+        <h5>Get To Know</h5>
+        <h2>About Me</h2>
+        <div class="container about__container">
+            <div class="about__me">
+                <div class="about__me-image">
+                    <img src="https://zahed.ffkenterprise.com/static/media/me-about.d129d72b05c8c2631d21.jpg"
+                        alt="About Me" />
+                </div>
+            </div>
+            <div class="about__content">
+                <div class="about__cards">
+                    <article class='about__card animated'>
+                        <i class="fa-solid fa-award about__icon"></i>
+                        <h5>Experience</h5>
+                        <small>3+ Years Working</small>
+                    </article>
+                    <article class='about__card animated'>
+                        <i class="fa-solid fa-users about__icon"></i>
+                        <h5>Research</h5>
+                        <small>2+ Conference Paper</small>
+                    </article>
+                    <article class='about__card animated'>
+                        <i class="fa-solid fa-folder-open about__icon"></i>
+                        <h5>Projects</h5>
+                        <small>2 Residential Bldgs & 5 Websites</small>
+                    </article>
+                </div>
+                <p>
+                    Passionate in designed based work and a Civil engineering graduate from KUET. Working as a Lecturer
+                    at the Department of Civil Engineering at Stamford University Bangladesh. Dedicated to take the
+                    organization to a better quality. Quick learner and willing to handle large volumes without
+                    compromising quality to prove myself as a professional engineer and a dedicated individual to serve
+                    the country.
+                </p>
+                <a href="#contact" class='btn btn-primary'>Let's Talk</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="education">
+        <h5>Where I Have Studied</h5>
+        <h2>My Education</h2>
+        <div class="container grid-two">
+            <div class="info-block">
+                <h3>Academic Qualification</h3>
+                <div id="education-section"></div>
+            </div>
+            <div class="info-block">
+                <h3>Certifications</h3>
+                <div id="certification-section"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <h5>What Experience I Have</h5>
+        <h2>My Experience</h2>
+        <div class="container grid-one">
+            <div class="info-block">
+                <h3>Working History</h3>
+                <div id="work-history"></div>
+            </div>
+            <div class="info-block">
+                <h3>Projects & Publications</h3>
+                <div id="project-list"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <h5>What Skills I Have</h5>
+        <h2>My Skills</h2>
+        <div class="container grid-two">
+            <div class="info-block">
+                <h3>Civil Engineering Skills</h3>
+                <div class="skills-grid" id="civil-skills"></div>
+            </div>
+            <div class="info-block">
+                <h3>Web Development Skills</h3>
+                <div class="skills-grid" id="web-skills"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services">
+        <h5>What Services I Offer</h5>
+        <h2>Services</h2>
+        <div class="container service__container">
+            <article class="service">
+                <div class="service__head">
+                    <h3>Civil Engineering</h3>
+                </div>
+                <ul class="service__list">
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Residential Building Structural Design</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Office Building Structural Design</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Foundation Design</p>
+                    </li>
+                </ul>
+            </article>
+            <article class="service">
+                <div class="service__head">
+                    <h3>Web Development</h3>
+                </div>
+                <ul class="service__list">
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>PHP Website</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Banking Software</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Sales Management Website</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Somity Software Development</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Portfolio Website</p>
+                    </li>
+                </ul>
+            </article>
+            <article class="service">
+                <div class="service__head">
+                    <h3>Other Services</h3>
+                </div>
+                <ul class="service__list">
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Teaching</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Data Management</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>MS Access Database Software</p>
+                    </li>
+                    <li><i class="fas fa-check service__list-icon"></i>
+                        <p>Content Writing</p>
+                    </li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section id="portfolio">
+        <h5>My Recent Works</h5>
+        <h2>Portfolio</h2>
+        <div class="container swiper portfolio__swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide portfolio__item">
+                    <div class="portfolio__item-image"><img src="https://via.placeholder.com/400x250" alt="Work"></div>
+                    <h3>Agent Banking Management</h3>
+                    <div class="portfolio__item-cta">
+                        <a href="https://youtube.com/playlist?list=PLEoB51HUURxfZDMCpk8hKdsfSx46dJ3bP" class="btn"
+                            target="_blank">Tutorial</a>
+                        <a href="https://fksollution.ffkenterprise.com/" class="btn btn-primary" target="_blank">Live
+                            Demo</a>
+                    </div>
+                </div>
+                <div class="swiper-slide portfolio__item">
+                    <div class="portfolio__item-image"><img src="https://via.placeholder.com/400x250" alt="Work"></div>
+                    <h3>Dealership Business Management</h3>
+                    <div class="portfolio__item-cta">
+                        <a href="https://dealer.ffkenterprise.com/" class="btn" target="_blank">Tutorial</a>
+                        <a href="https://dealer.ffkenterprise.com/" class="btn btn-primary" target="_blank">Live
+                            Demo</a>
+                    </div>
+                </div>
+                <div class="swiper-slide portfolio__item">
+                    <div class="portfolio__item-image"><img src="https://via.placeholder.com/400x250" alt="Work"></div>
+                    <h3>Three Storied Building</h3>
+                    <div class="portfolio__item-cta">
+                        <a href="#" class="btn btn-primary">View Design</a>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <section id="testimonials">
+        <h5>Review from clients</h5>
+        <h2>Testimonial</h2>
+        <div class="container swiper testimonial__swiper testimonial__container">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide testimonial">
+                    <div class="client__avatar"><img src="https://i.pravatar.cc/150?u=1" alt="Client" /></div>
+                    <h5 class="client__name">Abdul Mannan</h5>
+                    <small class="client__review">High quality structural design and professional delivery.</small>
+                </div>
+                <div class="swiper-slide testimonial">
+                    <div class="client__avatar"><img src="https://i.pravatar.cc/150?u=2" alt="Client" /></div>
+                    <h5 class="client__name">Zubaer Hossain</h5>
+                    <small class="client__review">Excellent web development skills, highly recommended.</small>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h5>Get In Touch</h5>
+        <h2>Contact Me</h2>
+        <div class="container contact__container">
+            <div class="contact__options">
+                <article class="contact__option animated">
+                    <i class="fa-solid fa-envelope"></i>
+                    <h4>Email</h4>
+                    <h5>zahedce91@gmail.com</h5>
+                    <a href="mailto:zahedce91@gmail.com" target="_blank">Send a message</a>
+                </article>
+                <article class="contact__option animated">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <h4>Whatsapp</h4>
+                    <h5>+8801751744807</h5>
+                    <a href="https://wa.me/8801751744807" target="_blank">Send a message</a>
+                </article>
+            </div>
+            <form id="contact-form">
+                <input type="text" name="name" placeholder="Your Full Name" required />
+                <input type="email" name="email" placeholder="Enter Your Email" required />
+                <input type="text" name="subject" placeholder="Enter Your Subject" required />
+                <textarea name="message" rows="7" placeholder="Your Message" required></textarea>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer__logo">
+            <h3>ZAHED</h3>
+        </div>
+        <ul class='permalinks'>
+            <li><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#contact">Contact</a></li>
+
+        </ul>
+        <div class="footer__socials" id="footer__socials">
+        </div>
+
+
+        <div class="footer__copyright">
+            <small>&copy; Md. Zahed Hossain. All rights reserved.</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script>
+        /*================ FULL DATA RESTORATION ================*/
+        const educationData = [
+            { degree: 'M.Sc. in Civil Engineering', duration: 'April 2023 - Present', institute: 'Bangladesh University of Engineering & Technology (BUET)', description: 'Major: Transportation Engineering' },
+            { degree: 'B.Sc. in Civil Engineering', duration: 'Feb 2016 - April 2022', institute: 'Khulna University of Engineering & Technology (KUET)', description: 'Thesis Major: Water Resource | CGPA: 3.78/4.00' },
+            { degree: 'H.S.C.', duration: 'April 2014 - Feb 2016', institute: 'Govt. Haji Mohammad Mohsin College', description: 'Group: Science | GPA: 5.00/5.00' },
+            { degree: 'S.S.C.', duration: '2014', institute: 'Chakaria Korak Biddyapith', description: 'Group: Science | GPA: 5.00/5.00' }
+        ];
+
+        const certificationData = [
+            { name: 'GIS, Mapping Specialization', description: 'University of Toronto (Credential: AMB4JEMP5FWL)' },
+            { name: 'Python For Everybody', description: 'University of Michigan (Credential: J5WU3SY5Y39H)' },
+            { name: 'Excel Skills For Business', description: 'Macquarie University (Credential: V3HZWKGC8TEK)' },
+            { name: 'Project Management', description: 'University of California, Irvine (Credential: AGF7WYUKS4JW)' }
+        ];
+
+        const experienceData = [
+            { name: 'Lecturer', duration: 'Jan 2024 - Present', institute: 'Bangladesh University of Business and Technology (BUBT)' },
+            { name: 'Former Lecturer', duration: 'Jan 2023 - Dec 2023', institute: 'Stamford University Bangladesh' },
+            { name: 'Former Lecturer', duration: 'Aug 2022 - Dec 2023', institute: 'University of Creative Technology Chittagong' }
+        ];
+
+        const projectData = [
+            { name: 'Identifying groundwater recharge potential zones...', details: 'AIP Conf. Proc. 2713 (1): 050001 (2023).', link: 'https://doi.org/10.1063/5.0129774' },
+            { name: 'Flood Susceptibility Assessment...', details: 'AHP-GIS Based Approach (2022).', link: 'https://www.researchgate.net/' },
+            { name: 'Undergraduate Thesis', details: 'Groundwater recharge potential zoning in the Barind Tract.', link: '#' }
+        ];
+
+        const civilSkills = [
+            { name: 'ArcGIS', type: 'Mapping' }, { name: 'AutoCAD', type: 'Design' },
+            { name: 'Etabs', type: 'Analysis' }, { name: 'Revit', type: 'BIM' },
+            { name: 'Tekla Structure', type: 'Design' }, { name: 'Python/R', type: 'Coding' }
+        ];
+
+        const webSkills = [
+            { name: 'PHP', type: 'Backend' }, { name: 'JavaScript', type: 'Frontend' },
+            { name: 'MySQL', type: 'Database' }, { name: 'Bootstrap', type: 'Frontend' },
+            { name: 'WordPress', type: 'CMS' }, { name: 'HTML5/CSS3', type: 'Frontend' }
+        ];
+
+        /*================ POPULATION LOGIC ================*/
+        const renderList = (id, data, template) => {
+            const container = document.getElementById(id);
+            data.forEach(item => container.innerHTML += template(item));
+        };
+
+        renderList("education-section", educationData, i => `<article class="details-item"><i class="fa-solid fa-school details-icon"></i><div><h4>${i.degree}</h4><small>${i.duration}</small><h5>${i.institute}</h5><small>${i.description}</small></div></article>`);
+        renderList("certification-section", certificationData, i => `<article class="details-item"><i class="fa-solid fa-certificate details-icon"></i><div><h4>${i.name}</h4><small>${i.description}</small></div></article>`);
+        renderList("work-history", experienceData, i => `<article class="details-item"><i class="fa-solid fa-industry details-icon"></i><div><h4>${i.name}</h4><small>${i.duration}</small><h5>${i.institute}</h5></div></article>`);
+        renderList("project-list", projectData, i => `<article class="details-item"><i class="fa-solid fa-file-lines details-icon"></i><div><h4>${i.name}</h4><small>${i.details}</small><br><a href="${i.link}" class="btn" style="padding: 0.2rem 0.5rem; margin-top:0.5rem;" target="_blank">View Publication</a></div></article>`);
+        renderList("civil-skills", civilSkills, i => `<article class="details-item"><i class="fa-solid fa-circle-check details-icon"></i><div><h4>${i.name}</h4><small>${i.type}</small></div></article>`);
+        renderList("web-skills", webSkills, i => `<article class="details-item"><i class="fa-solid fa-circle-check details-icon"></i><div><h4>${i.name}</h4><small>${i.type}</small></div></article>`);
+
+        /*================ SOCIAL LINKS (DEFINE ONCE) ================*/
+       
+        const socialLinks = [
+            { url: "https://www.linkedin.com/in/zahedce91", icon: "fa-brands fa-linkedin" },
+            { url: "https://www.researchgate.net/profile/Md-Hossain-389", icon: "fa-brands fa-researchgate" },
+            { url: "https://www.facebook.com/zahedce91", icon: "fa-brands fa-facebook" },
+            { url: "https://www.youtube.com/channel/UC4KkmEhdtszttGok1mdWNRQ", icon: "fa-brands fa-youtube" }
+        ];
+
+        function renderSocials(containerId) {
+            const container = document.getElementById(containerId);
+            socialLinks.forEach(social => {
+                container.innerHTML += ` <a href="${social.url}" target="_blank"> <i class="${social.icon}"></i> </a> `;
+            });
+        }
+        renderSocials("header__socials");
+        renderSocials("footer__socials");
+
+
+        /*================ INTERACTIVITY ================*/
+        new Swiper('.portfolio__swiper', { slidesPerView: 1, spaceBetween: 20, pagination: { el: '.swiper-pagination', clickable: true }, breakpoints: { 600: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } } });
+        new Swiper('.testimonial__swiper', { slidesPerView: 1, pagination: { el: '.swiper-pagination', clickable: true } });
+
+        const strings = ['Civil Engineer', 'Teacher', 'Web Developer'];
+        let charIdx = 0, strIdx = 0, isDeleting = false;
+        function typeEffect() {
+            const fullText = strings[strIdx];
+            const el = document.getElementById("typewriter");
+            el.textContent = isDeleting ? fullText.substring(0, charIdx--) : fullText.substring(0, charIdx++);
+            if (!isDeleting && charIdx === fullText.length) { setTimeout(() => isDeleting = true, 2000); }
+            else if (isDeleting && charIdx === 0) { isDeleting = false; strIdx = (strIdx + 1) % strings.length; }
+            setTimeout(typeEffect, isDeleting ? 50 : 100);
+        }
+        typeEffect();
+
+        document.getElementById('contact-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            emailjs.sendForm('service_20yq4fu', 'template_ck34kik', this).then(() => { alert('Success!'); this.reset(); });
+        });
+    </script>
+</body>
+
+</html>
