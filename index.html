@@ -1035,6 +1035,87 @@
             e.preventDefault();
             emailjs.sendForm('service_20yq4fu', 'template_ck34kik', this).then(() => { alert('Success!'); this.reset(); });
         });
+
+        /////Scroll Effect
+        // Configuration for scroll ranges based on screen width
+        const getActiveSection = () => {
+            const scrollY = window.scrollY;
+            const isMobile = window.matchMedia("(max-width: 600px)").matches;
+            const isTablet = window.matchMedia("(max-width: 1024px)").matches;
+        
+            if (isMobile) {
+                if (scrollY < 520) return "#";
+                if (scrollY < 1770) return "#about";
+                if (scrollY < 2870) return "#education";
+                if (scrollY < 4400) return "#experience";
+                if (scrollY > 5650 && scrollY < 6800) return "#services";
+                if (scrollY > 8200 && scrollY < 9500) return "#contact";
+            } else if (isTablet) {
+                if (scrollY < 520) return "#";
+                if (scrollY < 1220) return "#about";
+                if (scrollY < 2500) return "#education";
+                if (scrollY < 3500) return "#experience";
+                if (scrollY > 5000 && scrollY < 6000) return "#services";
+                if (scrollY > 7200 && scrollY < 8300) return "#contact";
+            } else {
+                // Desktop
+                if (scrollY < 520) return "#";
+                if (scrollY < 1200) return "#about";
+                if (scrollY < 2100) return "#education";
+                if (scrollY < 3000) return "#experience";
+                if (scrollY > 3550 && scrollY < 4200) return "#services";
+                if (scrollY > 5400 && scrollY < 6650) return "#contact";
+            }
+            return "";
+        };
+        
+        // Function to update the 'active' class on nav links
+        const updateActiveLink = () => {
+            const activeSection = getActiveSection();
+            const navLinks = document.querySelectorAll('nav a');
+        
+            navLinks.forEach(link => {
+                // Get the href attribute (e.g., "#about")
+                const href = link.getAttribute('href');
+                
+                if (href === activeSection || (href === "# " && activeSection === "#")) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        };
+        
+        // Initialize event listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. Listen for scroll events
+            window.addEventListener("scroll", updateActiveLink);
+        
+            // 2. Theme Toggle logic
+            const themeChanger = document.querySelector('.theme-changer p');
+            if (themeChanger) {
+                themeChanger.addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                });
+            }
+        
+            // 3. Manual click handling (optional, ensures immediate feedback)
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+        
+            // Run once on load to set initial state
+            updateActiveLink();
+        });
+
+
+
+        
     </script>
 </body>
 
