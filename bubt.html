@@ -166,12 +166,70 @@
   .course-card .cc-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
 
    /* ── Developer Bar ── */
-   .developer-bar {     position: fixed;     bottom: 0;     left: 0;     right: 0;     background: rgba(13, 15, 20, 0.85);     backdrop-filter: blur(8px);     border-top: 1px solid var(--border);     padding: 6px 20px;     text-align: center;     font-size: 0.75rem;     font-family: 'IBM Plex Mono', monospace;     z-index: 10000;     transition: all 0.2s ease;     color: var(--text);   }   html[data-theme="light"] 
-   .developer-bar {     background: rgba(255, 255, 255, 0.92);     border-top-color: #e2e8f0;     color: #1e293b;   }   .developer-bar a {     color: var(--accent);     text-decoration: none;     font-weight: 600;   }   html[data-theme="light"] 
-   .developer-bar a {     color: #2563eb;   }   
-   .developer-bar .close-bar {     position: absolute;     right: 12px;     top: 50%;     transform: translateY(-50%);     cursor: pointer;     background: none;     border: none;     color: var(--muted);     font-size: 1rem;     padding: 0 4px;   }   html[data-theme="light"] 
-   .developer-bar .close-bar {     color: #64748b;   }   
-   .developer-bar .close-bar:hover {     color: var(--danger);   }
+  .developer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #e2e8f0;
+    padding: 6px 20px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    z-index: 10000;
+    transition: all 0.2s ease;
+    color: #1e293b;
+  }
+
+  /* Dark theme override */
+  html[data-theme="dark"] .developer-bar {
+    background: rgba(13, 15, 20, 0.85);
+    border-top-color: var(--border);
+    color: var(--text);
+  }
+
+  .developer-bar a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* Light theme link color (default) */
+  .developer-bar a {
+    color: #2563eb;
+  }
+
+  html[data-theme="dark"] .developer-bar a {
+    color: var(--accent);
+  }
+
+  .developer-bar .close-bar {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1rem;
+    padding: 0 4px;
+  }
+
+  /* Light theme close button color */
+  .developer-bar .close-bar {
+    color: #64748b;
+  }
+
+  html[data-theme="dark"] .developer-bar .close-bar {
+    color: var(--muted);
+  }
+
+  .developer-bar .close-bar:hover {
+    color: var(--danger);
+  }
    
   /* ── Print styles ── */
   @media print{
@@ -1063,6 +1121,34 @@ function renderResults(){
           html += `<td style="font-family:'IBM Plex Mono',monospace;font-size:.78rem"><span class="${ok?'tag-y':'tag-n'}">${val!==null?val.toFixed(1)+'%':'—'}</span></td>`;
       });
       html += `<td><b>${passCount}/${activePI.length}</b></td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+  // Segment scores (styled like other tables)
+  html += `<div class="panel"><div class="panel-title">Student Marks per Segment</div>`;
+  html += `<div class="tbl-wrap">`;
+  html += `<table><thead>`;
+  html += `<tr><th>#</th><th class="left">Name</th>`;
+  state.segments.forEach(seg => html += `<th>${seg.name}<br><small>/${seg.fullMark}</small></th>`);
+  html += `<th>Total</th>`;
+  html += `</thead><tbody>`;
+
+  state.students.forEach((stu, si) => {
+    let studentTotal = 0;
+    html += `<tr>`;
+    html += `<td>${si+1}</td>`;
+    html += `<td class="left">${stu.name}</td>`;
+    
+    state.segments.forEach(seg => {
+      const t = (state.marks[si]?.[seg.id] || []).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+      studentTotal += t;
+      const segmentFormatted = Math.abs(t - Math.round(t)) < 0.01 ? Math.round(t).toString() : t.toFixed(1);
+      html += `<td>${segmentFormatted}</td>`;
+    });
+    
+    const totalFormatted = Math.abs(studentTotal - Math.round(studentTotal)) < 0.01 ? Math.round(studentTotal).toString() : studentTotal.toFixed(1);
+    html += `<td><strong>${totalFormatted}</strong></td>`;
+    html += `</tr>`;
   });
   html += `</tbody></table></div></div>`;
 
