@@ -246,6 +246,7 @@
     }
     body{background:#fff!important;color:#111!important;font-family:'Segoe UI',Arial,sans-serif}
     #app>header,#progress-wrap,.no-print,main>.page:not(.print-target){display:none!important}
+    
     .print-target{display:block!important}
     .print-page{page-break-after:always;padding:18mm 16mm;background:#fff;color:#111}
     .print-page:last-child{page-break-after:auto}
@@ -254,7 +255,7 @@
     .p-section{margin-bottom:12px}
     .p-section h3{font-size:10pt;font-weight:700;color:#1a3c6e;border-bottom:1px solid #c0c8d8;padding-bottom:3px;margin-bottom:6px}
     table{border-collapse:collapse;width:100%;font-size:8.5pt}
-    th{background:#1a3c6e!important;color:#fff!important;padding:5px 8px;text-align:center}
+    th{background:#f1f5f9!important;color:#2563eb!important;padding:5px 8px;text-align:center}    
     td{padding:4px 8px;border:1px solid #c0c8d8;text-align:center}
     .kpi-print{display:inline-block;border:1px solid #c0c8d8;border-radius:6px;padding:6px 14px;margin:4px;text-align:center}
     .kpi-print .v{font-size:18pt;font-weight:700;color:#1a3c6e}
@@ -289,7 +290,7 @@
     <button class="btn btn-ghost btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
     <label class="btn btn-ghost btn-sm" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn btn-primary btn-sm" onclick="newCourse()">＋ New Course</button>
-    <button id="themeToggle" class="btn btn-ghost btn-sm">🌙 Dark</button>
+    <!-- <button id="themeToggle" class="btn btn-ghost btn-sm">🌙 Dark</button> -->
   </div>
 </header>
 
@@ -1092,12 +1093,12 @@ function renderResults(){
   </div>`;
 
   // Per-student CO table
-  html+=`<div class="panel"><div class="panel-title">Per-Student CO Attainment (%)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th class="left">Name</th>`;
+  html+=`<div class="panel"><div class="panel-title">Per-Student CO Attainment (%)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th class="left">ID</th><th class="left">Name</th>`;
   for(let c=0;c<nCO;c++)if(R.coMax[c]>0)html+=`<th>CO${c+1}</th>`;
   html+=`<th>Pass COs</th></tr></thead><tbody>`;
   state.students.forEach((stu,si)=>{
     const passCount=activeCI.filter(c=>R.stuCOPct[si][c]!==null&&R.stuCOPct[si][c]>=I.target).length;
-    html+=`<tr><td>${si+1}</td><td class="left">${stu.name}</td>`;
+    html+=`<tr><td>${si+1}</td><td class="left">${stu.id}</td><td class="left">${stu.name}</td>`;
     activeCI.forEach(c=>{
       const pct=R.stuCOPct[si][c];
       const ok=pct>=I.target;
@@ -1108,13 +1109,13 @@ function renderResults(){
   html+=`</tbody></table></div></div>`;
 
   // Per-student PO table
-  html += `<div class="panel"><div class="panel-title">Student-wise PO Attainment (%)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th class="left">Name</th>`;
+  html += `<div class="panel"><div class="panel-title">Student-wise PO Attainment (%)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th class="left">ID</th><th class="left">Name</th>`;
   activePI.forEach(p => html += `<th>PO${p+1}</th>`);
   html += `<th>Pass POs</th></tr></thead><tbody>`;
   state.students.forEach((stu, si) => {
       const passCount = activePI.filter(p => R.stuPO[si][p] !== null && R.stuPO[si][p] >= I.target).length;
       
-      html += `<tr><td>${si+1}</td><td class="left">${stu.name}</td>`;
+      html += `<tr><td>${si+1}</td><td class="left">${stu.id}</td><td class="left">${stu.name}</td>`;
       activePI.forEach(p => {
           const val = R.stuPO[si][p];
           const ok = val !== null && val >= I.target;
@@ -1128,7 +1129,7 @@ function renderResults(){
   html += `<div class="panel"><div class="panel-title">Student Marks per Segment</div>`;
   html += `<div class="tbl-wrap">`;
   html += `<table><thead>`;
-  html += `<tr><th>#</th><th class="left">Name</th>`;
+  html += `<tr><th>#</th><th class="left">ID</th><th class="left">Name</th>`;
   state.segments.forEach(seg => html += `<th>${seg.name}<br><small>/${seg.fullMark}</small></th>`);
   html += `<th>Total</th>`;
   html += `</thead><tbody>`;
@@ -1137,7 +1138,7 @@ function renderResults(){
     let studentTotal = 0;
     html += `<tr>`;
     html += `<td>${si+1}</td>`;
-    html += `<td class="left">${stu.name}</td>`;
+    html += `<td class="left">${stu.id}</td><td class="left">${stu.name}</td>`;
     
     state.segments.forEach(seg => {
       const t = (state.marks[si]?.[seg.id] || []).reduce((a, b) => a + (parseFloat(b) || 0), 0);
@@ -1404,12 +1405,12 @@ function printDetail(){
   html += ` <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px"> Number of Students: ${state.students.length}  -- Target Percentage:		${I.target}%  </div> `;
   // Segment scores
   html += `<div class="p-section"><h3>Student Marks</h3><table><thead>`;
-  html += `<tr><th>#</th><th style="text-align:left">Name</th>`;
+  html += `<tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
   state.segments.forEach(seg => html += `<th>${seg.name}<br><small>/${seg.fullMark}</small></th>`);
   html += `<th>Total</th></tr></thead><tbody>`;
   state.students.forEach((stu, si) => {
     let studentTotal = 0;
-    html += `<tr><td>${si+1}</td><td style="text-align:left">${stu.name}</td>`;
+    html += `<tr><td>${si+1}</td><td style="text-align:left">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
     
     state.segments.forEach(seg => {
       const t = (state.marks[si]?.[seg.id] || []).reduce((a, b) => a + (parseFloat(b) || 0), 0);
