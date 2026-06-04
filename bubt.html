@@ -7,6 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
+    /* Light theme (default) */
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #cbd5e1;
+    --accent: #2563eb;
+    --accent2: #16a34a;
+    --accent3: #ea580c;
+    --danger: #dc2626;
+    --text: #0f172a;
+    --muted: #475569;
+    --radius: 10px;
+  }
+
+  /* Dark theme override */
+  html[data-theme="dark"] {
     --bg: #0d0f14;
     --surface: #161a23;
     --surface2: #1e2330;
@@ -17,21 +33,6 @@
     --danger: #f75c5c;
     --text: #e8ecf4;
     --muted: #7a87a3;
-    --radius: 10px;
-  }
-
-  /* Light theme class */
-  html[data-theme="light"] {
-    --bg: #ffffff; /* #f8fafc */ 
-    --surface: #ffffff;
-    --surface2: #f1f5f9;
-    --border: #cbd5e1;
-    --accent: #2563eb;
-    --accent2: #16a34a;
-    --accent3: #ea580c;
-    --danger: #dc2626;
-    --text: #0f172a;
-    --muted: #475569;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
@@ -255,14 +256,14 @@
     <div class="panel-title">Step 1 — Course Information</div>
     <div class="form-grid">
       <div class="field"><label>University</label><input id="f-uni" placeholder="e.g. Bangladesh University of Business and Technology (BUBT)" value="Bangladesh University of Business and Technology (BUBT)"></div>
-      <div class="field"><label>Semester</label><input id="f-sem" placeholder="e.g. Summer 2022"></div>
+      <div class="field"><label>Semester</label><input id="f-sem" placeholder="e.g. Summer 2026"></div>
       <div class="field"><label>Intake</label><input id="f-intake" placeholder="e.g. 7"></div>
       <div class="field"><label>Section</label><input id="f-section" placeholder="e.g. 1"></div>
       <div class="field"><label>Course Code</label><input id="f-code" placeholder="e.g. CE 2172"></div>
       <div class="field"><label>BNQF Code</label><input id="f-bnqf" placeholder="e.g. 07322172"></div>
       <div class="field"><label>Course Title</label><input id="f-title" placeholder="e.g. Environmental Engineering"></div>
-      <div class="field"><label>Teacher Name</label><input id="f-teacher" placeholder="e.g. Afiya Anjum Nimu"></div>
-      <div class="field"><label>Teacher Short Code</label><input id="f-tcode" placeholder="e.g. AAN"></div>
+      <div class="field"><label>Teacher Name</label><input id="f-teacher" placeholder="e.g. Md. Zahed Hossain"></div>
+      <div class="field"><label>Teacher Short Code</label><input id="f-tcode" placeholder="e.g. MDZH"></div>
       <div class="field"><label>Total Students</label><input id="f-nstudents" type="number" min="1" value="25"></div>
       <div class="field"><label>Target Attainment %</label><input id="f-target" type="number" min="1" max="100" value="50"></div>
       <div class="field"><label>Number of COs</label><input id="f-nco" type="number" min="1" max="10" value="6"></div>
@@ -278,7 +279,7 @@
 <div class="page" id="page-segments">
   <div class="panel">
     <div class="panel-title">Step 2 — Assessment Segments</div>
-    <div class="alert alert-info">Define each assessment component (e.g. CT-1, CT-2, Assignment, Midterm, Final). Set full marks and how many questions.</div>
+    <div class="alert alert-info">Define each assessment component (e.g. Attendance, CT-1, CT-2, Assignment, Midterm, Final). Set full marks and how many questions.</div>
     <div class="seg-list" id="seg-list"></div>
     <div class="panel" style="padding:14px">
       <div class="panel-title" style="margin-bottom:10px">Add Segment</div>
@@ -337,7 +338,7 @@
       <div class="alert alert-info">Copy cells from Excel (ID, Name, Status) and paste below. Columns should be: <b>Student ID | Name | Status</b></div>
       <div class="paste-zone" id="paste-zone" onclick="document.getElementById('paste-ta').focus()">
         <p>Click here then paste (Ctrl+V / ⌘V) your student data from Excel</p>
-        <textarea id="paste-ta" style="width:100%;min-height:120px;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;font-family:'IBM Plex Mono',monospace;font-size:.78rem;outline:none" placeholder="Student ID&#9;Name&#9;Status&#10;CEN 071 10587&#9;Sifat E Rabbi&#9;Regular&#10;..."></textarea>
+        <textarea id="paste-ta" style="width:100%;min-height:120px;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;font-family:'IBM Plex Mono',monospace;font-size:.78rem;outline:none" placeholder="Student ID&#9;Name&#9;Status&#10;20234109001&#9;Sifat E Rabbi&#9;Regular&#10;..."></textarea>
       </div>
       <div class="btn-row"><button class="btn btn-success" onclick="parsePaste()">Parse Students</button></div>
     </div>
@@ -351,7 +352,7 @@
     <div class="itab-content" id="tab-manual">
       <div class="alert alert-info">Add students one by one.</div>
       <div class="form-grid">
-        <div class="field"><label>Student ID</label><input id="ms-id" placeholder="e.g. CEN 071 10587"></div>
+        <div class="field"><label>Student ID</label><input id="ms-id" placeholder="e.g. 20234109001"></div>
         <div class="field"><label>Name</label><input id="ms-name" placeholder="Full name"></div>
         <div class="field"><label>Status</label><input id="ms-status" placeholder="Regular / Irregular" value="Regular"></div>
       </div>
@@ -647,7 +648,7 @@ function renderCoMapPage(){
       html+=`<tr><td class="left"><b>CO${co+1}</b></td>`;
       for(let q=0;q<seg.nQuestions;q++){
         const v=state.coMap[seg.id][co][q]||0;
-        html+=`<td><input class="cell-in narrow" type="number" min="0" step="0.1" value="${v}" data-seg="${seg.id}" data-co="${co}" data-q="${q}" onchange="updateCoMap(this)" oninput="updateRowSum('${seg.id}',${co})"></td>`;
+        html+=`<td><input class="cell-in narrow" type="number" min="0" step="0.5" value="${v}" data-seg="${seg.id}" data-co="${co}" data-q="${q}" onchange="updateCoMap(this)" oninput="updateRowSum('${seg.id}',${co})"></td>`;
       }
       const rowSum=state.coMap[seg.id][co].reduce((a,b)=>a+(+b||0),0);
       html+=`<td id="rsum-${seg.id}-${co}" style="font-family:'IBM Plex Mono',monospace;color:var(--accent2)">${rowSum.toFixed(2)}</td></tr>`;
@@ -1553,33 +1554,33 @@ function goPage(id){
 // ─────────────────────────────────────────────
 function initTheme() {
   const saved = localStorage.getItem('bubt_theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const theme = saved || (prefersDark ? 'dark' : 'light');
+  // Default to 'light' if no saved preference
+  const theme = saved || 'light';
   setTheme(theme);
 }
 
 function setTheme(theme) {
   const html = document.documentElement;
-  if (theme === 'light') {
-    html.setAttribute('data-theme', 'light');
-    localStorage.setItem('bubt_theme', 'light');
-    const btn = document.getElementById('themeToggle');
-    if (btn) btn.innerHTML = '☀️ Light';
-  } else {
-    html.removeAttribute('data-theme'); // fallback to dark (default)
+  if (theme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
     localStorage.setItem('bubt_theme', 'dark');
     const btn = document.getElementById('themeToggle');
     if (btn) btn.innerHTML = '🌙 Dark';
+  } else {
+    html.removeAttribute('data-theme'); // fallback to light (default)
+    localStorage.setItem('bubt_theme', 'light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.innerHTML = '☀️ Light';
   }
   // If results page is open, redraw charts to match new theme
   if (currentPage === 'page-results' && state.results) {
-    renderResults(); // this will redraw charts with correct isDark flag
+    renderResults();
   }
 }
 
 function toggleTheme() {
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  setTheme(isLight ? 'dark' : 'light');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  setTheme(isDark ? 'light' : 'dark');
 }
 
 // Attach event listener after DOM is ready
