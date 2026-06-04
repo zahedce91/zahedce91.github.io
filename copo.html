@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CO/PO Assessment Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a23;
+    --surface2: #1e2330;
+    --border: #2a3044;
+    --accent: #4f8ef7;
+    --accent2: #38e09c;
+    --accent3: #f7914f;
+    --danger: #f75c5c;
+    --text: #e8ecf4;
+    --muted: #7a87a3;
+    --radius: 10px;
+  }
+
+  /* Light theme class */
+  html[data-theme="light"] {
+    --bg: #ffffff; /* #f8fafc */ 
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: #cbd5e1;
+    --accent: #2563eb;
+    --accent2: #16a34a;
+    --accent3: #ea580c;
+    --danger: #dc2626;
+    --text: #0f172a;
+    --muted: #475569;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--surface)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  /* ── Layout ── */
+  #app{display:flex;flex-direction:column;min-height:100vh}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  header .logo{display:flex;align-items:center;gap:10px}
+  header .logo-mark{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;color:#fff}
+  header h1{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
+  header .sub{font-size:.72rem;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+  .hdr-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* ── Progress bar ── */
+  #progress-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px}
+  .steps-row{display:flex;overflow-x:auto;gap:0}
+  .step-item{display:flex;align-items:center;gap:0;flex-shrink:0}
+  .step-btn{padding:12px 16px;background:none;border:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s;display:flex;align-items:center;gap:6px}
+  .step-btn .snum{width:20px;height:20px;border-radius:50%;background:var(--border);font-size:.68rem;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace}
+  .step-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .step-btn.active .snum{background:var(--accent);color:#fff}
+  .step-btn.done{color:var(--accent2)}
+  .step-btn.done .snum{background:var(--accent2);color:#0d0f14}
+  .step-sep{color:var(--border);font-size:.7rem;padding:0 2px}
+
+  /* ── Main area ── */
+  main{flex:1;padding:28px;max-width:1100px;width:100%;margin:0 auto}
+  .page{display:none}
+  .page.active{display:block}
+
+  /* ── Cards / panels ── */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+  .panel-title{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:16px;font-family:'IBM Plex Mono',monospace}
+
+  /* ── Forms ── */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .form-grid.cols2{grid-template-columns:1fr 1fr}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:.75rem;color:var(--muted);font-weight:600;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+  .field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-family:'Syne',sans-serif;font-size:.88rem;outline:none;transition:.2s;width:100%}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15)}
+  .field textarea{resize:vertical;min-height:60px}
+  select option{background:var(--surface2)}
+
+  /* ── Buttons ── */
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:7px;border:none;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3a7de8}
+  .btn-success{background:var(--accent2);color:#0d0f14}
+  .btn-success:hover{background:#29c985}
+  .btn-warn{background:var(--accent3);color:#fff}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-sm{padding:5px 12px;font-size:.75rem}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center}
+
+  /* ── Segment cards ── */
+  .seg-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .seg-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .seg-card .seg-name{font-weight:700;font-size:.9rem;min-width:120px}
+  .seg-card .seg-meta{color:var(--muted);font-size:.78rem;font-family:'IBM Plex Mono',monospace}
+  .seg-card .seg-actions{margin-left:auto;display:flex;gap:6px}
+
+  /* ── Tables ── */
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th{background:var(--surface2);color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;padding:9px 10px;text-align:center;border:1px solid var(--border);white-space:nowrap}
+  th.left{text-align:left}
+  td{padding:7px 10px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+  td.left{text-align:left}
+  tr:hover td{background:rgba(79,142,247,.04)}
+  input.cell-in{background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:4px 6px;width:60px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.8rem;outline:none}
+  input.cell-in:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(79,142,247,.2)}
+  input.cell-in.wide{width:90px}
+  input.cell-in.narrow{width:46px}
+
+  /* ── Matrix ── */
+  .matrix-grid{display:grid;gap:6px;overflow-x:auto}
+  .mrow{display:flex;gap:6px;align-items:center}
+  .mlabel{width:44px;font-size:.75rem;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-align:right;flex-shrink:0}
+  .mcell{width:42px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.82rem;outline:none;cursor:pointer;transition:.2s}
+  .mcell:focus{border-color:var(--accent)}
+  .mcell[data-v="0"]{background:var(--surface2);color:var(--muted)}
+  .mcell[data-v="1"]{background:rgba(79,142,247,.2);color:var(--accent)}
+  .mcell[data-v="2"]{background:rgba(56,224,156,.2);color:var(--accent2)}
+  .mcell[data-v="3"]{background:rgba(247,145,79,.25);color:var(--accent3)}
+
+  /* ── Paste area ── */
+  .paste-zone{background:var(--surface2);border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:.2s;min-height:80px}
+  .paste-zone:hover,.paste-zone.dragover{border-color:var(--accent);background:rgba(79,142,247,.06)}
+  .paste-zone p{color:var(--muted);font-size:.85rem}
+
+  /* ── Output / Results ── */
+  .result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+  .kpi{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+  .kpi-val{font-size:2rem;font-weight:800;font-family:'IBM Plex Mono',monospace}
+  .kpi-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:4px}
+  .tag-y{background:rgba(56,224,156,.15);color:var(--accent2);padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:700;font-family:'IBM Plex Mono',monospace}
+  .tag-n{background:rgba(247,92,92,.15);color:var(--danger);padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:700;font-family:'IBM Plex Mono',monospace}
+  .tag-na{background:var(--surface2);color:var(--muted);padding:2px 8px;border-radius:9999px;font-size:.72rem;font-family:'IBM Plex Mono',monospace}
+
+  /* ── Chart canvases ── */
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  @media(max-width:700px){.charts-row{grid-template-columns:1fr}}
+  .chart-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+  .chart-box h3{font-size:.75rem;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+  canvas{max-width:100%;display:block;margin:0 auto}
+
+  /* ── Alerts ── */
+  .alert{padding:10px 14px;border-radius:7px;font-size:.82rem;margin-bottom:12px}
+  .alert-info{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.3);color:var(--accent)}
+  .alert-warn{background:rgba(247,145,79,.12);border:1px solid rgba(247,145,79,.3);color:var(--accent3)}
+  .alert-success{background:rgba(56,224,156,.12);border:1px solid rgba(56,224,156,.3);color:var(--accent2)}
+
+  /* ── Tabs within page ── */
+  .inner-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+  .itab{padding:6px 14px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s}
+  .itab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .itab-content{display:none}
+  .itab-content.active{display:block}
+
+  /* ── Saved courses ── */
+  .course-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .course-card .cc-info{flex:1}
+  .course-card .cc-code{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--accent)}
+  .course-card .cc-title{font-weight:700;margin-top:2px}
+  .course-card .cc-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+   /* ── Developer Bar ── */
+   .developer-bar {     position: fixed;     bottom: 0;     left: 0;     right: 0;     background: rgba(13, 15, 20, 0.85);     backdrop-filter: blur(8px);     border-top: 1px solid var(--border);     padding: 6px 20px;     text-align: center;     font-size: 0.75rem;     font-family: 'IBM Plex Mono', monospace;     z-index: 10000;     transition: all 0.2s ease;     color: var(--text);   }   html[data-theme="light"] 
+   .developer-bar {     background: rgba(255, 255, 255, 0.92);     border-top-color: #e2e8f0;     color: #1e293b;   }   .developer-bar a {     color: var(--accent);     text-decoration: none;     font-weight: 600;   }   html[data-theme="light"] 
+   .developer-bar a {     color: #2563eb;   }   
+   .developer-bar .close-bar {     position: absolute;     right: 12px;     top: 50%;     transform: translateY(-50%);     cursor: pointer;     background: none;     border: none;     color: var(--muted);     font-size: 1rem;     padding: 0 4px;   }   html[data-theme="light"] 
+   .developer-bar .close-bar {     color: #64748b;   }   
+   .developer-bar .close-bar:hover {     color: var(--danger);   }
+   
+  /* ── Print styles ── */
+  @media print{
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+    @page {
+      size: A4; margin: 0.5in 0.5in 0.5in 1in; /* top, right, bottom, left */
+ 
+      @bottom-center {
+        content: "Page " counter(page);
+        font-size: 9pt;
+        color: #555;
+      }
+
+    }
+    body{background:#fff!important;color:#111!important;font-family:'Segoe UI',Arial,sans-serif}
+    #app>header,#progress-wrap,.no-print,main>.page:not(.print-target){display:none!important}
+    .print-target{display:block!important}
+    .print-page{page-break-after:always;padding:18mm 16mm;background:#fff;color:#111}
+    .print-page:last-child{page-break-after:auto}
+    .ph{font-size:10pt;color:#555}
+    .pt{font-size:13pt;font-weight:700;margin-bottom:6px}
+    .p-section{margin-bottom:12px}
+    .p-section h3{font-size:10pt;font-weight:700;color:#1a3c6e;border-bottom:1px solid #c0c8d8;padding-bottom:3px;margin-bottom:6px}
+    table{border-collapse:collapse;width:100%;font-size:8.5pt}
+    th{background:#1a3c6e!important;color:#fff!important;padding:5px 8px;text-align:center}
+    td{padding:4px 8px;border:1px solid #c0c8d8;text-align:center}
+    .kpi-print{display:inline-block;border:1px solid #c0c8d8;border-radius:6px;padding:6px 14px;margin:4px;text-align:center}
+    .kpi-print .v{font-size:18pt;font-weight:700;color:#1a3c6e}
+    .kpi-print .l{font-size:7.5pt;color:#555}
+    canvas{max-width:260px!important}
+    .tag-y{background:#fff!important; color:#166534!important}
+    .tag-n{color:#991b1b!important}
+
+    .developer-bar { display: none; }
+    .alert { display: none !important; }
+
+    
+  }
+ 
+
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">CO</div>
+    <div>
+      <h1>CO/PO Assessment Tool</h1>
+      <div class="sub">Course Outcome · Programme Outcome · OBE Tracking</div>
+    </div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn btn-ghost btn-sm" onclick="openCourses()">📂 My Courses</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
+    <label class="btn btn-ghost btn-sm" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+    <button class="btn btn-primary btn-sm" onclick="newCourse()">＋ New Course</button>
+    <button id="themeToggle" class="btn btn-ghost btn-sm">🌙 Dark</button>
+  </div>
+</header>
+
+<!-- PROGRESS -->
+<div id="progress-wrap">
+  <div class="steps-row" id="steps-row"></div>
+</div>
+
+<main>
+
+<!-- PAGE 0: COURSES -->
+<div class="page active" id="page-courses">
+  <div class="panel">
+    <div class="panel-title">Saved Courses</div>
+    <div id="courses-list"><p style="color:var(--muted)">No courses yet. Click <b>＋ New Course</b> to begin.</p></div>
+  </div>
+</div>
+
+<!-- PAGE 1: COURSE INFO -->
+<div class="page" id="page-info">
+  <div class="panel">
+    <div class="panel-title">Step 1 — Course Information</div>
+    <div class="form-grid">
+      <div class="field"><label>University</label><input id="f-uni" placeholder="e.g. Bangladesh University of Business and Technology (BUBT)" value="Bangladesh University of Business and Technology (BUBT)"></div>
+      <div class="field"><label>Semester</label><input id="f-sem" placeholder="e.g. Summer 2022"></div>
+      <div class="field"><label>Intake</label><input id="f-intake" placeholder="e.g. 7"></div>
+      <div class="field"><label>Section</label><input id="f-section" placeholder="e.g. 1"></div>
+      <div class="field"><label>Course Code</label><input id="f-code" placeholder="e.g. CE 2172"></div>
+      <div class="field"><label>BNQF Code</label><input id="f-bnqf" placeholder="e.g. 07322172"></div>
+      <div class="field"><label>Course Title</label><input id="f-title" placeholder="e.g. Environmental Engineering"></div>
+      <div class="field"><label>Teacher Name</label><input id="f-teacher" placeholder="e.g. Afiya Anjum Nimu"></div>
+      <div class="field"><label>Teacher Short Code</label><input id="f-tcode" placeholder="e.g. AAN"></div>
+      <div class="field"><label>Total Students</label><input id="f-nstudents" type="number" min="1" value="25"></div>
+      <div class="field"><label>Target Attainment %</label><input id="f-target" type="number" min="1" max="100" value="50"></div>
+      <div class="field"><label>Number of COs</label><input id="f-nco" type="number" min="1" max="10" value="6"></div>
+      <div class="field"><label>Number of POs</label><input id="f-npo" type="number" min="1" max="12" value="12"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveInfoGo()">Next: Segments →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: SEGMENTS -->
+<div class="page" id="page-segments">
+  <div class="panel">
+    <div class="panel-title">Step 2 — Assessment Segments</div>
+    <div class="alert alert-info">Define each assessment component (e.g. CT-1, CT-2, Assignment, Midterm, Final). Set full marks and how many questions.</div>
+    <div class="seg-list" id="seg-list"></div>
+    <div class="panel" style="padding:14px">
+      <div class="panel-title" style="margin-bottom:10px">Add Segment</div>
+      <div class="form-grid">
+        <div class="field"><label>Segment Name</label><input id="ns-name" placeholder="e.g. CT-1"></div>
+        <div class="field"><label>Full Mark (%)</label><input id="ns-mark" type="number" min="0.1" step="0.5" value="7.5"></div>
+        <div class="field"><label>No. of Questions</label><input id="ns-nq" type="number" min="1" max="20" value="4"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-success btn-sm" onclick="addSegment()">＋ Add Segment</button></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goPage('page-info')">← Back</button>
+      <button class="btn btn-primary" onclick="saveSegmentsGo()">Next: CO Mapping →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: CO MAPPING -->
+<div class="page" id="page-co-map">
+  <div class="panel">
+    <div class="panel-title">Step 3 — CO–Question Mapping per Segment</div>
+    <div class="alert alert-info">For each segment, enter the marks assigned to each CO for each question. Use decimals for split marks (e.g. Q4 split 70% CO2 → enter 0.7 × full mark).</div>
+    <div class="inner-tabs" id="comap-tabs"></div>
+    <div id="comap-panels"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goPage('page-segments')">← Back</button>
+      <button class="btn btn-primary" onclick="saveCoMapGo()">Next: CO–PO Matrix →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: CO-PO MATRIX -->
+<div class="page" id="page-copo">
+  <div class="panel">
+    <div class="panel-title">Step 4 — CO–PO Correlation Matrix</div>
+    <div class="alert alert-info">Enter 0 (none), 1 (weak), 2 (moderate), or 3 (strong) for each CO–PO pair. Click a cell to cycle through values.</div>
+    <div id="copo-matrix"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goPage('page-co-map')">← Back</button>
+      <button class="btn btn-primary" onclick="saveCoPoGo()">Next: Student Data →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5: STUDENTS -->
+<div class="page" id="page-students">
+  <div class="panel">
+    <div class="panel-title">Step 5 — Student Data</div>
+    <div class="inner-tabs">
+      <div class="itab active" onclick="switchImportTab('tab-paste',this)">📋 Paste from Excel</div>
+      <div class="itab" onclick="switchImportTab('tab-upload',this)">📄 Upload .xlsx</div>
+      <div class="itab" onclick="switchImportTab('tab-manual',this)">✏️ Manual Entry</div>
+    </div>
+    <!-- Paste -->
+    <div class="itab-content active" id="tab-paste">
+      <div class="alert alert-info">Copy cells from Excel (ID, Name, Status) and paste below. Columns should be: <b>Student ID | Name | Status</b></div>
+      <div class="paste-zone" id="paste-zone" onclick="document.getElementById('paste-ta').focus()">
+        <p>Click here then paste (Ctrl+V / ⌘V) your student data from Excel</p>
+        <textarea id="paste-ta" style="width:100%;min-height:120px;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;font-family:'IBM Plex Mono',monospace;font-size:.78rem;outline:none" placeholder="Student ID&#9;Name&#9;Status&#10;CEN 071 10587&#9;Sifat E Rabbi&#9;Regular&#10;..."></textarea>
+      </div>
+      <div class="btn-row"><button class="btn btn-success" onclick="parsePaste()">Parse Students</button></div>
+    </div>
+    <!-- Upload -->
+    <div class="itab-content" id="tab-upload">
+      <div class="alert alert-info">Upload an .xlsx file. First sheet, columns: <b>Student ID | Name | Status</b> (header row optional).</div>
+      <label class="btn btn-ghost" style="cursor:pointer">📎 Choose .xlsx file<input type="file" accept=".xlsx,.xls" style="display:none" onchange="uploadXlsx(event)"></label>
+      <div id="upload-status" style="margin-top:10px;font-size:.82rem;color:var(--muted)"></div>
+    </div>
+    <!-- Manual -->
+    <div class="itab-content" id="tab-manual">
+      <div class="alert alert-info">Add students one by one.</div>
+      <div class="form-grid">
+        <div class="field"><label>Student ID</label><input id="ms-id" placeholder="e.g. CEN 071 10587"></div>
+        <div class="field"><label>Name</label><input id="ms-name" placeholder="Full name"></div>
+        <div class="field"><label>Status</label><input id="ms-status" placeholder="Regular / Irregular" value="Regular"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-success btn-sm" onclick="addManualStudent()">＋ Add Student</button></div>
+    </div>
+  </div>
+
+  <!-- Student list preview -->
+  <div class="panel" id="students-preview-panel" style="display:none">
+    <div class="panel-title">Students Added (<span id="stu-count">0</span>)</div>
+    <div class="tbl-wrap">
+      <table id="stu-preview-tbl">
+        <thead><tr><th class="left">#</th><th class="left">ID</th><th class="left">Name</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="stu-preview-body"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goPage('page-copo')">← Back</button>
+      <button class="btn btn-primary" onclick="goPage('page-marks')">Next: Enter Marks →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 6: MARKS ENTRY -->
+<div class="page" id="page-marks">
+  <div class="panel">
+    <div class="panel-title">Step 6 — Enter Student Marks</div>
+    <div class="alert alert-info">Enter marks for each student per segment. Max marks per question shown in header.</div>
+    <div class="inner-tabs" id="marks-tabs"></div>
+    <div id="marks-panels"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goPage('page-students')">← Back</button>
+      <button class="btn btn-success" onclick="computeAndGo()">✓ Calculate Results →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 7: RESULTS -->
+<div class="page" id="page-results">
+  <div class="panel no-print">
+    <div class="panel-title">Results & Analysis</div>
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="printSummary()">🖨 Print Summary (A4)</button>
+      <button class="btn btn-ghost" onclick="printDetail()">🖨 Print Detail (A4)</button>
+      <button class="btn btn-ghost" onclick="exportJSON()">⬇ Export JSON</button>
+    </div>
+    <div id="results-body"></div>
+  </div>
+
+  <!-- PRINT SUMMARY PAGE -->
+  <div id="print-summary" style="display:none">
+    <div class="print-page" id="ps-content"></div>
+  </div>
+  <!-- PRINT DETAIL PAGE -->
+  <div id="print-detail" style="display:none">
+    <div class="print-page" id="pd-content"></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div class="developer-bar" id="developerBar">
+  <span>👨‍💻 Developed by <a href="https://zahed.ffkenterprise.com" target="_blank" rel="noopener noreferrer">Md. Zahed Hossain</a> (Lecturer, Civil Engineering, BUBT)</span>
+  <button class="close-bar" onclick="document.getElementById('developerBar').style.display='none'" aria-label="Close">✕</button>
+</div>
+
+<!-- XLSX parser from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let state = {
+  info: {},
+  segments: [],      // [{id,name,fullMark,nQuestions}]
+  coMap: {},         // segId -> {co1:[{q,mark},...], co2:...}  stored as coMap[segId][coIdx][qIdx] = weight
+  copo: [],          // [nCO][nPO] = 0/1/2/3
+  students: [],      // [{id,name,status}]
+  marks: {},         // [stuIdx][segId][qIdx] = mark
+  results: null
+};
+const STEP_NAMES = ['Courses','Course Info','Segments','CO Mapping','CO–PO Matrix','Students','Marks Entry','Results'];
+let currentPage = 'page-courses';
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function uid(){return 'seg_'+Math.random().toString(36).slice(2,8)}
+function $(id){return document.getElementById(id)}
+function val(id){return $(id)?$(id).value.trim():''}
+function numVal(id,def=0){const v=parseFloat(val(id));return isNaN(v)?def:v}
+function intVal(id,def=0){const v=parseInt(val(id));return isNaN(v)?def:v}
+function showEl(id,show=true){const e=$(id);if(e)e.style.display=show?'':'none'}
+function toast(msg,type='info'){
+  const d=document.createElement('div');
+  d.className='alert alert-'+type;
+  d.textContent=msg;
+  d.style.cssText='position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 360px; text-align: center; animation: fadeIn 0.3s';
+  document.body.appendChild(d);setTimeout(()=>d.remove(),3500);
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function buildSteps(){
+  const row=$('steps-row');
+  row.innerHTML='';
+  STEP_NAMES.forEach((n,i)=>{
+    if(i>0){const sep=document.createElement('span');sep.className='step-sep';sep.textContent='›';row.appendChild(sep)}
+    const btn=document.createElement('button');
+    btn.className='step-btn';btn.dataset.step=i;
+    btn.innerHTML=`<span class="snum">${i}</span>${n}`;
+    btn.onclick=()=>{
+      const pages=['page-courses','page-info','page-segments','page-co-map','page-copo','page-students','page-marks','page-results'];
+      if(i===0){openCourses();return}
+      goPage(pages[i]);
+    };
+    row.appendChild(btn);
+  });
+}
+function updateSteps(){
+  const pages=['page-courses','page-info','page-segments','page-co-map','page-copo','page-students','page-marks','page-results'];
+  const idx=pages.indexOf(currentPage);
+  document.querySelectorAll('.step-btn').forEach((b,i)=>{
+    b.classList.remove('active','done');
+    if(i===idx)b.classList.add('active');
+    else if(i<idx)b.classList.add('done');
+  });
+}
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  currentPage=id;
+  updateSteps();
+  window.scrollTo(0,0);
+}
+function openCourses(){renderCourses();goPage('page-courses')}
+function newCourse(){state={info:{},segments:[],coMap:{},copo:[],students:[],marks:{},results:null};goPage('page-info')}
+
+// ─────────────────────────────────────────────
+// LOCALSTORAGE
+// ─────────────────────────────────────────────
+function allCourses(){try{return JSON.parse(localStorage.getItem('bubt_courses')||'[]')}catch{return[]}}
+function saveCourseToStorage(){
+  if(!state.info.code)return;
+  const all=allCourses();
+  const idx=all.findIndex(c=>c.info.code===state.info.code);
+  if(idx>=0)all[idx]=state;else all.push(state);
+  localStorage.setItem('bubt_courses',JSON.stringify(all));
+  toast('Course saved','success');
+}
+function loadCourse(code){
+  const all=allCourses();
+  const c=all.find(x=>x.info.code===code);
+  if(c){state=c;toast('Course loaded','success');}
+}
+function deleteCourse(code){
+  const all=allCourses().filter(c=>c.info.code!==code);
+  localStorage.setItem('bubt_courses',JSON.stringify(all));
+  renderCourses();
+}
+function renderCourses(){
+  const all=allCourses();
+  const el=$('courses-list');
+  if(!all.length){el.innerHTML='<p style="color:var(--muted)">No courses saved yet. Click <b>＋ New Course</b> to begin.</p>';return;}
+  el.innerHTML=all.map(c=>`
+    <div class="course-card">
+      <div class="cc-info">
+        <div class="cc-code">${c.info.code||'—'}</div>
+        <div class="cc-title">${c.info.title||'Untitled'}</div>
+        <div class="cc-meta">${c.info.semester||''} · Intake ${c.info.intake||''}-${c.info.section||''} · ${c.info.teacher||''} · ${c.students?.length||0} students</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="loadAndOpen('${c.info.code}')">Open</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteCourse('${c.info.code}')">Delete</button>
+    </div>
+  `).join('');
+}
+function loadAndOpen(code){
+  loadCourse(code);
+  if(state.results)goPage('page-results');
+  else if(state.marks&&Object.keys(state.marks).length)goPage('page-marks');
+  else if(state.students?.length)goPage('page-students');
+  else if(state.copo?.length)goPage('page-copo');
+  else if(state.segments?.length)goPage('page-segments');
+  else goPage('page-info');
+}
+
+// ─────────────────────────────────────────────
+// STEP 1: COURSE INFO
+// ─────────────────────────────────────────────
+function saveInfoGo(){
+  const code=val('f-code');
+  if(!code){toast('Course code is required','warn');return;}
+  state.info={
+    uni:val('f-uni'),semester:val('f-sem'),intake:val('f-intake'),section:val('f-section'),
+    code,bnqf:val('f-bnqf'),title:val('f-title'),teacher:val('f-teacher'),tcode:val('f-tcode'),
+    nStudents:intVal('f-nstudents',25),target:numVal('f-target',50),
+    nCO:intVal('f-nco',6),nPO:intVal('f-npo',12)
+  };
+  renderSegmentPage();
+  goPage('page-segments');
+}
+// Pre-fill info fields when going back
+function prefillInfo(){
+  const f=state.info;
+  if(!f.code)return;
+  ['uni','sem','intake','section','code','bnqf','title','teacher','tcode'].forEach(k=>{
+    const el=$('f-'+k);if(el)el.value=f[k]||'';
+  });
+  $('f-nstudents').value=f.nStudents||25;
+  $('f-target').value=f.target||50;
+  $('f-nco').value=f.nCO||6;
+  $('f-npo').value=f.nPO||12;
+}
+
+// ─────────────────────────────────────────────
+// STEP 2: SEGMENTS
+// ─────────────────────────────────────────────
+function renderSegmentPage(){
+  const list=$('seg-list');
+  list.innerHTML=state.segments.map((s,i)=>`
+    <div class="seg-card" id="scard-${s.id}">
+      <div class="seg-name">${s.name}</div>
+      <div class="seg-meta">Full Mark: <b>${s.fullMark}</b> &nbsp;|&nbsp; Questions: <b>${s.nQuestions}</b></div>
+      <div class="seg-actions">
+        <button class="btn btn-danger btn-sm" onclick="removeSegment('${s.id}')">✕</button>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--muted);padding:8px">No segments yet.</p>';
+}
+function addSegment(){
+  const name=val('ns-name');
+  const fullMark=numVal('ns-mark',7.5);
+  const nq=intVal('ns-nq',4);
+  if(!name){toast('Segment name required','warn');return;}
+  if(nq<1||nq>20){toast('Questions must be 1–20','warn');return;}
+  state.segments.push({id:uid(),name,fullMark,nQuestions:nq});
+  $('ns-name').value='';
+  renderSegmentPage();
+}
+function removeSegment(id){
+  state.segments=state.segments.filter(s=>s.id!==id);
+  renderSegmentPage();
+}
+function saveSegmentsGo(){
+  if(!state.segments.length){toast('Add at least one segment','warn');return;}
+  renderCoMapPage();
+  goPage('page-co-map');
+}
+
+// ─────────────────────────────────────────────
+// STEP 3: CO MAPPING
+// ─────────────────────────────────────────────
+function renderCoMapPage(){
+  const tabs=$('comap-tabs');
+  const panels=$('comap-panels');
+  tabs.innerHTML='';panels.innerHTML='';
+  const nCO=state.info.nCO||6;
+  state.segments.forEach((seg,si)=>{
+    // init storage
+    if(!state.coMap[seg.id]){
+      state.coMap[seg.id]=Array.from({length:nCO},()=>Array(seg.nQuestions).fill(0));
+    } else {
+      // resize if needed
+      while(state.coMap[seg.id].length<nCO)state.coMap[seg.id].push(Array(seg.nQuestions).fill(0));
+      state.coMap[seg.id]=state.coMap[seg.id].map(row=>{
+        while(row.length<seg.nQuestions)row.push(0);
+        return row.slice(0,seg.nQuestions);
+      });
+    }
+    // tab
+    const tab=document.createElement('div');
+    tab.className='itab'+(si===0?' active':'');
+    tab.textContent=seg.name;
+    tab.onclick=function(){
+      document.querySelectorAll('#comap-tabs .itab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('#comap-panels .itab-content').forEach(p=>p.classList.remove('active'));
+      this.classList.add('active');
+      $('cmp-'+seg.id).classList.add('active');
+    };
+    tabs.appendChild(tab);
+    // panel
+    const panel=document.createElement('div');
+    panel.className='itab-content'+(si===0?' active':'');
+    panel.id='cmp-'+seg.id;
+    // build table
+    let html=`<div class="alert alert-info" style="margin-bottom:10px">Segment: <b>${seg.name}</b> — Full Mark: <b>${seg.fullMark}</b>. Enter the mark value each CO gets from each question (0 if not applicable). You can use decimals for partial credit.</div>`;
+    html+=`<div class="tbl-wrap"><table><thead><tr><th class="left">CO</th>`;
+    for(let q=0;q<seg.nQuestions;q++)html+=`<th>Q${q+1}<br><small style="color:var(--muted);font-size:.65rem">marks</small></th>`;
+    html+=`<th>Row Sum</th></tr></thead><tbody>`;
+    for(let co=0;co<nCO;co++){
+      html+=`<tr><td class="left"><b>CO${co+1}</b></td>`;
+      for(let q=0;q<seg.nQuestions;q++){
+        const v=state.coMap[seg.id][co][q]||0;
+        html+=`<td><input class="cell-in narrow" type="number" min="0" step="0.1" value="${v}" data-seg="${seg.id}" data-co="${co}" data-q="${q}" onchange="updateCoMap(this)" oninput="updateRowSum('${seg.id}',${co})"></td>`;
+      }
+      const rowSum=state.coMap[seg.id][co].reduce((a,b)=>a+(+b||0),0);
+      html+=`<td id="rsum-${seg.id}-${co}" style="font-family:'IBM Plex Mono',monospace;color:var(--accent2)">${rowSum.toFixed(2)}</td></tr>`;
+    }
+    // Col totals
+    html+=`<tr style="background:var(--surface2)"><td class="left" style="color:var(--muted);font-size:.75rem">Q Max</td>`;
+    for(let q=0;q<seg.nQuestions;q++){
+      const colSum=state.coMap[seg.id].reduce((a,row)=>a+(+row[q]||0),0);
+      html+=`<td id="csum-${seg.id}-${q}" style="font-family:'IBM Plex Mono',monospace;color:var(--accent3)">${colSum.toFixed(2)}</td>`;
+    }
+    html+=`<td></td></tr>`;
+    html+=`</tbody></table></div>`;
+    panel.innerHTML=html;
+    panels.appendChild(panel);
+  });
+}
+function updateCoMap(input){
+  const {seg,co,q}=input.dataset;
+  state.coMap[seg][co][q]=parseFloat(input.value)||0;
+  updateRowSum(seg,parseInt(co));
+  updateColSum(seg,parseInt(q));
+}
+function updateRowSum(segId,co){
+  const row=state.coMap[segId][co];
+  const s=row.reduce((a,b)=>a+(+b||0),0);
+  const el=$('rsum-'+segId+'-'+co);
+  if(el)el.textContent=s.toFixed(2);
+}
+function updateColSum(segId,q){
+  const s=state.coMap[segId].reduce((a,row)=>a+(+row[q]||0),0);
+  const el=$('csum-'+segId+'-'+q);
+  if(el)el.textContent=s.toFixed(2);
+}
+function saveCoMapGo(){
+  // read all inputs
+  document.querySelectorAll('[data-seg][data-co][data-q]').forEach(input=>{
+    const {seg,co,q}=input.dataset;
+    if(state.coMap[seg])state.coMap[seg][co][q]=parseFloat(input.value)||0;
+  });
+  renderCoPoMatrix();
+  goPage('page-copo');
+}
+
+// ─────────────────────────────────────────────
+// STEP 4: CO-PO MATRIX
+// ─────────────────────────────────────────────
+function renderCoPoMatrix(){
+  const nCO=state.info.nCO||6;
+  const nPO=state.info.nPO||12;
+  if(!state.copo||state.copo.length!==nCO){
+    state.copo=Array.from({length:nCO},()=>Array(nPO).fill(0));
+  }
+  const cont=$('copo-matrix');
+  let html=`<div class="tbl-wrap"><table><thead><tr><th class="left">CO \\ PO</th>`;
+  for(let p=0;p<nPO;p++)html+=`<th>PO${p+1}</th>`;
+  html+=`</tr></thead><tbody>`;
+  for(let c=0;c<nCO;c++){
+    html+=`<tr><td class="left"><b>CO${c+1}</b></td>`;
+    for(let p=0;p<nPO;p++){
+      const v=state.copo[c][p]||0;
+      html+=`<td><select class="mcell" data-c="${c}" data-p="${p}" onchange="updateCoPo(this)" style="width:44px">${[0,1,2,3].map(n=>`<option value="${n}"${v===n?' selected':''}>${n}</option>`).join('')}</select></td>`;
+    }
+    html+=`</tr>`;
+  }
+  html+=`</tbody></table></div>`;
+  cont.innerHTML=html;
+}
+function updateCoPo(sel){
+  state.copo[sel.dataset.c][sel.dataset.p]=parseInt(sel.value)||0;
+}
+function saveCoPoGo(){
+  document.querySelectorAll('[data-c][data-p]').forEach(s=>{
+    state.copo[s.dataset.c][s.dataset.p]=parseInt(s.value)||0;
+  });
+  goPage('page-students');
+}
+
+// ─────────────────────────────────────────────
+// STEP 5: STUDENTS
+// ─────────────────────────────────────────────
+function switchImportTab(id,el){
+  document.querySelectorAll('.itab-content').forEach(x=>x.id.startsWith('tab-')&&x.classList.remove('active'));
+  document.querySelectorAll('.inner-tabs .itab').forEach(x=>x.classList.remove('active'));
+  $(id).classList.add('active');el.classList.add('active');
+}
+function parsePaste(){
+  const raw=$('paste-ta').value.trim();
+  if(!raw){toast('Nothing to parse','warn');return;}
+  const rows=raw.split('\n').map(r=>r.split('\t'));
+  const students=[];
+  rows.forEach(r=>{
+    if(!r[0]||r[0].toLowerCase().includes('student'))return;// skip header
+    students.push({id:(r[0]||'').trim(),name:(r[1]||'').trim(),status:(r[2]||'Regular').trim()});
+  });
+  if(!students.length){toast('No valid rows found','warn');return;}
+  state.students=students;
+  renderStudentPreview();
+  toast(students.length+' students imported','success');
+}
+function uploadXlsx(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const students=[];
+      rows.forEach(r=>{
+        if(!r[0])return;
+        const idStr=String(r[0]).trim();
+        if(idStr.toLowerCase().includes('student')||idStr.toLowerCase().includes('id'))return;
+        students.push({id:idStr,name:String(r[1]||'').trim(),status:String(r[2]||'Regular').trim()});
+      });
+      state.students=students;
+      renderStudentPreview();
+      $('upload-status').textContent=students.length+' students loaded from '+file.name;
+      toast(students.length+' students loaded','success');
+    }catch(err){toast('Error reading file: '+err.message,'warn');}
+  };
+  reader.readAsBinaryString(file);
+}
+function addManualStudent(){
+  const id=val('ms-id'),name=val('ms-name'),status=val('ms-status')||'Regular';
+  if(!id||!name){toast('ID and Name required','warn');return;}
+  state.students.push({id,name,status});
+  $('ms-id').value='';$('ms-name').value='';
+  renderStudentPreview();
+}
+function renderStudentPreview(){
+  showEl('students-preview-panel',state.students.length>0);
+  $('stu-count').textContent=state.students.length;
+  const body=$('stu-preview-body');
+  body.innerHTML=state.students.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td class="left"><span style="font-family:'IBM Plex Mono',monospace;font-size:.78rem">${s.id}</span></td>
+      <td class="left">${s.name}</td>
+      <td>${s.status}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeStudent(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+function removeStudent(i){
+  state.students.splice(i,1);
+  renderStudentPreview();
+}
+
+// ─────────────────────────────────────────────
+// STEP 6: MARKS ENTRY
+// ─────────────────────────────────────────────
+function renderMarksPage(){
+  const tabs=$('marks-tabs');
+  const panels=$('marks-panels');
+  tabs.innerHTML='';panels.innerHTML='';
+  state.segments.forEach((seg,si)=>{
+    // init marks storage
+    state.students.forEach((_,si2)=>{
+      if(!state.marks[si2])state.marks[si2]={};
+      if(!state.marks[si2][seg.id])state.marks[si2][seg.id]=Array(seg.nQuestions).fill('');
+    });
+    const tab=document.createElement('div');
+    tab.className='itab'+(si===0?' active':'');
+    tab.textContent=seg.name;
+    tab.onclick=function(){
+      document.querySelectorAll('#marks-tabs .itab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('#marks-panels .itab-content').forEach(p=>p.classList.remove('active'));
+      this.classList.add('active');
+      $('mp-'+seg.id).classList.add('active');
+    };
+    tabs.appendChild(tab);
+
+    const panel=document.createElement('div');
+    panel.className='itab-content'+(si===0?' active':'');
+    panel.id='mp-'+seg.id;
+
+    // Calc max per question from coMap
+    const nq=seg.nQuestions;
+    const qMax=Array(nq).fill(0);
+    for(let co=0;co<(state.info.nCO||6);co++){
+      for(let q=0;q<nq;q++){
+        const v=state.coMap[seg.id]?.[co]?.[q]||0;
+        if(v>qMax[q])qMax[q]=v; // use CO-assigned mark as guide
+      }
+    }
+    // sum all CO marks per q as column max
+    const qMaxSum=Array(nq).fill(0);
+    for(let q=0;q<nq;q++){
+      qMaxSum[q]=state.coMap[seg.id]?.reduce((a,row)=>a+(+row[q]||0),0)||0;
+    }
+
+    let html=`<div class="alert alert-info" style="margin-bottom:10px"><b>${seg.name}</b> — Full Mark: <b>${seg.fullMark}</b></div>`;
+    html+=`<div class="tbl-wrap"><table><thead><tr>
+      <th>#</th><th class="left">Name</th>`;
+    for(let q=0;q<nq;q++)html+=`<th>Q${q+1}<br><small style="font-size:.63rem;color:var(--muted)">${qMaxSum[q]>0?'/ '+qMaxSum[q]:''}</small></th>`;
+    html+=`<th>Total</th></tr></thead><tbody>`;
+
+    state.students.forEach((stu,si2)=>{
+      html+=`<tr><td>${si2+1}</td><td class="left" style="font-size:.8rem">${stu.name}</td>`;
+      for(let q=0;q<nq;q++){
+        const v=state.marks[si2]?.[seg.id]?.[q]??'';
+        html+=`<td><input class="cell-in narrow" type="number" min="0" step="0.5" value="${v}" data-stu="${si2}" data-seg="${seg.id}" data-q="${q}" onchange="updateMark(this)" oninput="updateRowTotal('${seg.id}',${si2},${nq})"></td>`;
+      }
+      const rowT=(state.marks[si2]?.[seg.id]||[]).reduce((a,b)=>a+(parseFloat(b)||0),0);
+      html+=`<td id="mt-${seg.id}-${si2}" style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-weight:700">${rowT||0}</td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+    panel.innerHTML=html;
+    panels.appendChild(panel);
+  });
+}
+function updateMark(input){
+  const {stu,seg,q}=input.dataset;
+  if(!state.marks[stu])state.marks[stu]={};
+  if(!state.marks[stu][seg])state.marks[stu][seg]=[];
+  state.marks[stu][seg][q]=parseFloat(input.value)||0;
+  updateRowTotal(seg,parseInt(stu),state.segments.find(s=>s.id===seg)?.nQuestions||4);
+}
+function updateRowTotal(segId,stuIdx,nq){
+  const marks=state.marks[stuIdx]?.[segId]||[];
+  const t=marks.slice(0,nq).reduce((a,b)=>a+(parseFloat(b)||0),0);
+  const el=$('mt-'+segId+'-'+stuIdx);
+  if(el)el.textContent=t.toFixed(2);
+}
+function computeAndGo(){
+  // read all mark inputs
+  document.querySelectorAll('[data-stu][data-seg][data-q]').forEach(input=>{
+    const {stu,seg,q}=input.dataset;
+    if(!state.marks[stu])state.marks[stu]={};
+    if(!state.marks[stu][seg])state.marks[stu][seg]=[];
+    state.marks[stu][seg][q]=parseFloat(input.value)||0;
+  });
+  computeResults();
+  renderResults();
+  saveCourseToStorage();
+  goPage('page-results');
+}
+
+// ─────────────────────────────────────────────
+// COMPUTATION ENGINE
+// ─────────────────────────────────────────────
+function computeResults(){
+  const nCO=state.info.nCO||6;
+  const nPO=state.info.nPO||12;
+  const target=state.info.target||50;
+
+  // Max marks per CO (across all segments)
+  const coMax=Array(nCO).fill(0);
+  state.segments.forEach(seg=>{
+    for(let co=0;co<nCO;co++){
+      coMax[co]+=(state.coMap[seg.id]?.[co]||[]).reduce((a,b)=>a+(+b||0),0);
+    }
+  });
+
+  // Per student CO marks
+  const stuCO=state.students.map((_,si)=>{
+    const co=Array(nCO).fill(0);
+    state.segments.forEach(seg=>{
+      for(let c=0;c<nCO;c++){
+        const row=state.coMap[seg.id]?.[c]||[];
+        const qTotForCO=row.reduce((a,b)=>a+(+b||0),0);
+        if(qTotForCO===0)continue;
+        const stuMarks=state.marks[si]?.[seg.id]||[];
+        // weighted contribution: sum(stuMark_q * coWeight_q / qMax_q) * coMax_CO
+        // simpler: each question: student got stuMark, CO assigned coWeight marks to this question
+        // CO contribution from q = stuMark * (coWeight/fullMarkOfQuestion)
+        // fullMarkOfQuestion = sum of all CO weights for that question
+        for(let q=0;q<seg.nQuestions;q++){
+          const coW=state.coMap[seg.id]?.[c]?.[q]||0;
+          if(coW===0)continue;
+          const qFullMark=(state.coMap[seg.id]||[]).reduce((a,row2)=>a+(+row2[q]||0),0);
+          const stuMark=parseFloat(stuMarks[q])||0;
+          if(qFullMark>0){
+            co[c]+= stuMark * (coW/qFullMark) ;
+          }
+        }
+      }
+    });
+    return co;
+  });
+
+  // CO% per student
+  const stuCOPct=stuCO.map(co=>co.map((v,i)=>coMax[i]>0?(v/coMax[i])*100:null));
+
+  // CO attainment
+  const coAttain=Array(nCO).fill(0).map((_,c)=>{
+    const n=stuCOPct.filter(row=>row[c]!==null&&row[c]>=target).length;
+    const total=stuCOPct.filter(row=>row[c]!==null).length;
+    return total>0?(n/total)*100:0;
+  });
+
+  // PO scores per student (CO->PO via matrix, use highest linked CO % or average)
+  const stuPO=state.students.map((_,si)=>{
+    const po=Array(nPO).fill(null);
+    for(let p=0;p<nPO;p++){
+      let totalW=0,weightedSum=0;
+      for(let c=0;c<nCO;c++){
+        const w=state.copo[c]?.[p]||0;
+        if(w>0&&stuCOPct[si][c]!==null){
+          totalW+=w;weightedSum+=stuCOPct[si][c]*w;
+        }
+      }
+      if(totalW>0)po[p]=weightedSum/totalW;
+    }
+    return po;
+  });
+
+  // PO attainment
+  const poAttain=Array(nPO).fill(0).map((_,p)=>{
+    const valid=stuPO.filter(row=>row[p]!==null);
+    if(!valid.length)return null;
+    const n=valid.filter(row=>row[p]>=target).length;
+    return(n/valid.length)*100;
+  });
+
+  // Segment totals per student
+  const stuSegTotals=state.students.map((_,si)=>{
+    const obj={};
+    state.segments.forEach(seg=>{
+      obj[seg.id]=(state.marks[si]?.[seg.id]||[]).reduce((a,b)=>a+(parseFloat(b)||0),0);
+    });
+    return obj;
+  });
+
+  state.results={coMax,stuCO,stuCOPct,coAttain,stuPO,poAttain,stuSegTotals,nCO,nPO,target};
+}
+
+// ─────────────────────────────────────────────
+// RENDER RESULTS
+// ─────────────────────────────────────────────
+function renderResults(){
+  const R=state.results;
+  const I=state.info;
+  const nCO=R.nCO;const nPO=R.nPO;
+
+  const activeCI=[...Array(nCO).keys()].filter(c=>R.coMax[c]>0);
+  const activePI=[...Array(nPO).keys()].filter(p=>R.poAttain[p]!==null);
+
+  let html=``;
+
+  // KPIs
+  html+=`<div class="result-grid">
+    <div class="kpi"><div class="kpi-val" style="color:var(--accent)">${state.students.length}</div><div class="kpi-lbl">Students</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--accent2)">${activeCI.length}</div><div class="kpi-lbl">Active COs</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:var(--accent3)">${activePI.length}</div><div class="kpi-lbl">Active POs</div></div>
+    <div class="kpi"><div class="kpi-val">${I.target}%</div><div class="kpi-lbl">Target</div></div>
+  </div>`;
+
+  // CO Attainment table
+  html+=`<div class="panel"><div class="panel-title">CO Attainment Summary</div>
+  <div class="tbl-wrap"><table><thead><tr><th>CO</th><th>Max Marks</th><th>Students ≥ ${I.target}%</th><th>Attainment %</th><th>Status</th></tr></thead><tbody>`;
+  for(let c=0;c<nCO;c++){
+    if(R.coMax[c]===0){html+=`<tr><td>CO${c+1}</td><td colspan="4" style="color:var(--muted)">Not assessed</td></tr>`;continue;}
+    const n=R.stuCOPct.filter(r=>r[c]!==null&&r[c]>=I.target).length;
+    const tot=R.stuCOPct.filter(r=>r[c]!==null).length;
+    const pct=R.coAttain[c].toFixed(1);
+    const ok=R.coAttain[c]>=I.target;
+    html+=`<tr><td><b>CO${c+1}</b></td><td>${R.coMax[c].toFixed(1)}</td><td>${n} / ${tot}</td><td style="font-family:'IBM Plex Mono',monospace;font-weight:700">${pct}%</td><td><span class="${ok?'tag-y':'tag-n'}">${ok?'Attained':'Below Target'}</span></td></tr>`;
+  }
+  html+=`</tbody></table></div></div>`;
+
+  // PO Attainment
+  html+=`<div class="panel"><div class="panel-title">PO Attainment Summary</div>
+  <div class="tbl-wrap"><table><thead><tr><th>PO</th><th>Linked COs</th><th>Attainment %</th><th>Status</th></tr></thead><tbody>`;
+  for(let p=0;p<nPO;p++){
+    const linked=[...Array(nCO).keys()].filter(c=>(state.copo[c]?.[p]||0)>0).map(c=>`CO${c+1}`).join(', ')||'—';
+    //if(R.poAttain[p]===null){html+=`<tr><td>PO${p+1}</td><td style="color:var(--muted)">${linked}</td><td colspan="2" style="color:var(--muted)">Not mapped</td></tr>`;continue;}
+    if(R.poAttain[p]===null){html+=``;continue;}
+    const ok=R.poAttain[p]>=I.target;
+    html+=`<tr><td><b>PO${p+1}</b></td><td style="font-size:.75rem;color:var(--muted)">${linked}</td><td style="font-family:'IBM Plex Mono',monospace;font-weight:700">${R.poAttain[p].toFixed(1)}%</td><td><span class="${ok?'tag-y':'tag-n'}">${ok?'Attained':'Below Target'}</span></td></tr>`;
+  }
+  html+=`</tbody></table></div></div>`;
+
+  // Charts row
+  html+=`<div class="charts-row">
+    <div class="chart-box"><h3>CO Attainment — Radar</h3><canvas id="co-radar" width="300" height="300"></canvas></div>
+    <div class="chart-box"><h3>PO Attainment — Radar</h3><canvas id="po-radar" width="300" height="300"></canvas></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-box"><h3>CO Attainment — Bar</h3><canvas id="co-bar" width="400" height="220"></canvas></div>
+    <div class="chart-box"><h3>PO Attainment — Bar</h3><canvas id="po-bar" width="400" height="220"></canvas></div>
+  </div>`;
+
+  // Per-student CO table
+  html+=`<div class="panel"><div class="panel-title">Per-Student CO Attainment (%)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th class="left">Name</th>`;
+  for(let c=0;c<nCO;c++)if(R.coMax[c]>0)html+=`<th>CO${c+1}</th>`;
+  html+=`<th>Pass COs</th></tr></thead><tbody>`;
+  state.students.forEach((stu,si)=>{
+    const passCount=activeCI.filter(c=>R.stuCOPct[si][c]!==null&&R.stuCOPct[si][c]>=I.target).length;
+    html+=`<tr><td>${si+1}</td><td class="left">${stu.name}</td>`;
+    activeCI.forEach(c=>{
+      const pct=R.stuCOPct[si][c];
+      const ok=pct>=I.target;
+      html+=`<td style="font-family:'IBM Plex Mono',monospace;font-size:.78rem"><span class="${ok?'tag-y':'tag-n'}">${pct!==null?pct.toFixed(1)+'%':'—'}</span></td>`;
+    });
+    html+=`<td><b>${passCount}/${activeCI.length}</b></td></tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+
+  // Per-student PO table
+  html += `<div class="panel"><div class="panel-title">Student-wise PO Attainment (%)</div><div class="tbl-wrap"><table><thead><tr><th>#</th><th class="left">Name</th>`;
+  activePI.forEach(p => html += `<th>PO${p+1}</th>`);
+  html += `<th>Pass POs</th></tr></thead><tbody>`;
+  state.students.forEach((stu, si) => {
+      const passCount = activePI.filter(p => R.stuPO[si][p] !== null && R.stuPO[si][p] >= I.target).length;
+      
+      html += `<tr><td>${si+1}</td><td class="left">${stu.name}</td>`;
+      activePI.forEach(p => {
+          const val = R.stuPO[si][p];
+          const ok = val !== null && val >= I.target;
+          html += `<td style="font-family:'IBM Plex Mono',monospace;font-size:.78rem"><span class="${ok?'tag-y':'tag-n'}">${val!==null?val.toFixed(1)+'%':'—'}</span></td>`;
+      });
+      html += `<td><b>${passCount}/${activePI.length}</b></td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+
+  $('results-body').innerHTML=html;
+  
+
+  // Draw charts
+  setTimeout(()=>{
+    drawRadar('co-radar', activeCI.map(c=>`CO${c+1}`), activeCI.map(c=>R.coAttain[c]), '#4f8ef7', I.target);
+    drawRadar('po-radar', activePI.map(p=>`PO${p+1}`), activePI.map(p=>R.poAttain[p]), '#38e09c', I.target);
+    drawBar('co-bar', activeCI.map(c=>`CO${c+1}`), activeCI.map(c=>R.coAttain[c]), '#4f8ef7', I.target);
+    drawBar('po-bar', activePI.map(p=>`PO${p+1}`), activePI.map(p=>R.poAttain[p]), '#38e09c', I.target);
+  },80);
+}
+
+// ─────────────────────────────────────────────
+// CHARTS
+// ─────────────────────────────────────────────
+function drawRadar(canvasId, labels, data, color, target){
+  const canvas=$(canvasId); if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)/2-36;
+  const n=labels.length; if(n<2)return;
+  const step=2*Math.PI/n;
+  //const isDark=true;
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  //const bg=isDark?'#161a23':'#fff';
+  const gridColor=isDark?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)';
+  const textColor=isDark?'#7a87a3':'#555';
+
+  // grid circles
+  [25,50,75,100].forEach(pct=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=-Math.PI/2+i*step;
+      const r=R*pct/100;
+      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle=gridColor;ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=textColor;ctx.font='10px IBM Plex Mono, monospace';
+    ctx.fillText(pct+'%', cx+R*(pct/100)*Math.cos(-Math.PI/2)-12, cy+R*(pct/100)*Math.sin(-Math.PI/2)-4);
+  });
+
+  // axes
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));
+    ctx.strokeStyle=gridColor;ctx.stroke();
+  }
+
+  // target polygon
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step;
+    const r=R*target/100;
+    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle='rgba(247,145,79,.6)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+
+  // data polygon
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step;
+    const r=R*(Math.min(data[i]||0,100))/100;
+    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle=color+'33';ctx.fill();
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+
+  // dots
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step;
+    const r=R*(Math.min(data[i]||0,100))/100;
+    ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,2*Math.PI);
+    ctx.fillStyle=color;ctx.fill();
+  }
+
+  // labels
+  ctx.fillStyle=textColor;ctx.font='bold 11px Syne, sans-serif';ctx.textAlign='center';
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step;
+    const lx=cx+(R+18)*Math.cos(a),ly=cy+(R+18)*Math.sin(a);
+    ctx.fillText(labels[i],lx,ly+4);
+  }
+}
+
+function drawBar(canvasId,labels,data,color,target){
+  const canvas=$(canvasId);if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const padL=30,padR=10,padT=16,padB=36;
+  const chartW=W-padL-padR,chartH=H-padT-padB;
+  const n=labels.length;if(!n)return;
+  const barW=Math.min(40,(chartW/n)-8);
+  //const isDark=true;
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor=isDark?'#7a87a3':'#555';
+  const gridColor=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';
+
+  // grid lines
+  [0,25,50,75,100].forEach(pct=>{
+    const y=padT+chartH*(1-pct/100);
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+chartW,y);
+    ctx.strokeStyle=gridColor;ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=textColor;ctx.font='9px IBM Plex Mono, monospace';ctx.textAlign='right';
+    ctx.fillText(pct,padL-3,y+3);
+  });
+
+  // target line
+  const ty=padT+chartH*(1-target/100);
+  ctx.beginPath();ctx.moveTo(padL,ty);ctx.lineTo(padL+chartW,ty);
+  ctx.strokeStyle='rgba(247,145,79,.7)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+
+  // bars
+  const gap=(chartW/n);
+  for(let i=0;i<n;i++){
+    const v=Math.min(data[i]||0,100);
+    const bh=chartH*v/100;
+    const bx=padL+i*gap+(gap-barW)/2;
+    const by=padT+chartH-bh;
+    const ok=v>=target;
+    ctx.fillStyle=ok?color:color+'88';
+    ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(bx,by,barW,bh,4):ctx.rect(bx,by,barW,bh);
+    ctx.fill();
+    // value
+    ctx.fillStyle=textColor;ctx.font='bold 10px IBM Plex Mono, monospace';ctx.textAlign='center';
+    ctx.fillText(v.toFixed(1),bx+barW/2,by-4);
+    // label
+    ctx.fillStyle=textColor;ctx.font='10px Syne, sans-serif';
+    ctx.fillText(labels[i],bx+barW/2,padT+chartH+16);
+  }
+}
+
+// ─────────────────────────────────────────────
+// PRINT
+// ─────────────────────────────────────────────
+function getHeaderHTML(){
+  const I=state.info;
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #1a3c6e;padding-bottom:8px">
+    <div>
+      <div style="font-size:13pt;font-weight:800;color:#1a3c6e">${I.uni||'BUBT'}</div>
+      <div style="font-size:9pt;color:#555;margin-top:2px">Semester: ${I.semester||''} &nbsp;|&nbsp; Intake-Section: ${I.intake||''}-${I.section||''} &nbsp;|&nbsp; Code: ${I.code||''} (${I.bnqf||''})</div>
+      <div style="font-size:9pt;color:#555">Course: <b>${I.title||''}</b> &nbsp;|&nbsp; Teacher: ${I.teacher||''} (${I.tcode||''})</div>
+    </div>
+    <div style="text-align:right;font-size:8pt;color:#999">Generated: ${new Date().toLocaleDateString()}</div>
+  </div>`;
+}
+
+function printSummary(){
+  const R=state.results;if(!R){toast('Calculate results first','warn');return;}
+  const I=state.info;
+  const nCO=R.nCO,nPO=R.nPO;
+  const activeCI=[...Array(nCO).keys()].filter(c=>R.coMax[c]>0);
+  const activePI=[...Array(nPO).keys()].filter(p=>R.poAttain[p]!==null);
+
+  // Build CO PO radar canvas snapshot
+  const coCanvas=document.createElement('canvas');coCanvas.width=280;coCanvas.height=280;
+  drawRadar_light(coCanvas,activeCI.map(c=>`CO${c+1}`),activeCI.map(c=>R.coAttain[c]),'#1a3c6e',I.target);
+  const poCanvas=document.createElement('canvas');poCanvas.width=280;poCanvas.height=280;
+  drawRadar_light(poCanvas,activePI.map(p=>`PO${p+1}`),activePI.map(p=>R.poAttain[p]),'#15803d',I.target);
+  const coBarC=document.createElement('canvas');coBarC.width=380;coBarC.height=200;
+  drawBar_light(coBarC,activeCI.map(c=>`CO${c+1}`),activeCI.map(c=>R.coAttain[c]),'#1a3c6e',I.target);
+  const poBarC=document.createElement('canvas');poBarC.width=380;poBarC.height=200;
+  drawBar_light(poBarC,activePI.map(p=>`PO${p+1}`),activePI.map(p=>R.poAttain[p]),'#15803d',I.target);
+
+  let html=getHeaderHTML();
+  html+=`<div style="font-size:12pt;font-weight:700;color:#1a3c6e;margin-bottom:10px;text-align:center">COURSE OUTCOME ATTAINMENT — SUMMARY REPORT</div>`;
+
+  // KPIs
+  html += ` <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px"> Number of Students: ${state.students.length}  -- Target Percentage:		${I.target}%  </div> `;
+
+  // CO table
+  html+=`<div class="p-section"><h3>Course Outcome (CO) Attainment</h3><table><thead><tr><th>CO</th><th>Max Marks</th><th>n (≥${I.target}%)</th><th>N</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
+  for(let c=0;c<nCO;c++){
+    const n=R.stuCOPct.filter(r=>r[c]!==null&&r[c]>=I.target).length;
+    const tot=R.stuCOPct.filter(r=>r[c]!==null).length;
+    const ok=R.coAttain[c]>=I.target;
+    html+=`<tr><td><b>CO${c+1}</b></td><td>${R.coMax[c]>0?R.coMax[c].toFixed(1):'—'}</td><td>${R.coMax[c]>0?n:'—'}</td><td>${R.coMax[c]>0?tot:'—'}</td><td style="font-weight:700">${R.coMax[c]>0?R.coAttain[c].toFixed(1)+'%':'Not assessed'}</td><td class="${ok?'tag-y':'tag-n'}">${R.coMax[c]>0?(ok?'Attained':'Below Target'):'—'}</td></tr>`;
+  }
+  html+=`</tbody></table></div>`;
+
+  // CO Charts
+  html+=`<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+    <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Radar</div><img src="${coCanvas.toDataURL()}" width="240"></div>
+    <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Bar</div><img src="${coBarC.toDataURL()}" width="320"></div>
+  </div>`;
+
+  // PO table
+  html+=`<div class="p-section"><h3>Programme Outcome (PO) Attainment</h3><table><thead><tr><th>PO</th><th>Linked COs</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
+  for(let p=0;p<nPO;p++){
+    if (R.poAttain[p] === null) continue;  // skip if Not mapped
+    const linked=[...Array(nCO).keys()].filter(c=>(state.copo[c]?.[p]||0)>0).map(c=>`CO${c+1}`).join(', ')||'—';
+    const ok=R.poAttain[p]>=I.target;
+    html+=`<tr><td><b>PO${p+1}</b></td><td style="font-size:8pt">${linked}</td><td style="font-weight:700">${R.poAttain[p]!==null?R.poAttain[p].toFixed(1)+'%':'Not mapped'}</td><td class="${ok?'tag-y':'tag-n'}">${R.poAttain[p]!==null?(ok?'Attained':'Below Target'):'—'}</td></tr>`;
+  }
+  html+=`</tbody></table></div>`;
+
+  // PO Charts
+  html+=`<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+    <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Radar</div><img src="${poCanvas.toDataURL()}" width="240"></div>
+    <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Bar</div><img src="${poBarC.toDataURL()}" width="320"></div>
+  </div>`;
+
+  //console.log(html);
+  $('ps-content').innerHTML = html;
+    showEl('print-summary', true);
+    showEl('print-detail', false);
+    document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.add('no-print'));
+    const pageResults = $('page-results');   // ✅ correct
+    if (pageResults) pageResults.classList.add('print-target');
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            showEl('print-summary', false);
+            document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.remove('no-print'));
+            if (pageResults) pageResults.classList.remove('print-target');
+        }, 500);
+    }, 200);
+}
+
+function printDetail(){
+  const R=state.results;if(!R){toast('Calculate results first','warn');return;}
+  const I=state.info;
+  const nCO=R.nCO,nPO=R.nPO;
+  const activeCI=[...Array(nCO).keys()].filter(c=>R.coMax[c]>0);
+  const activePI=[...Array(nPO).keys()].filter(p=>R.poAttain[p]!==null);
+
+  // Build CO PO radar canvas snapshot
+  const coCanvas=document.createElement('canvas');coCanvas.width=280;coCanvas.height=280;
+  drawRadar_light(coCanvas,activeCI.map(c=>`CO${c+1}`),activeCI.map(c=>R.coAttain[c]),'#1a3c6e',I.target);
+  const poCanvas=document.createElement('canvas');poCanvas.width=280;poCanvas.height=280;
+  drawRadar_light(poCanvas,activePI.map(p=>`PO${p+1}`),activePI.map(p=>R.poAttain[p]),'#15803d',I.target);
+  const coBarC=document.createElement('canvas');coBarC.width=380;coBarC.height=200;
+  drawBar_light(coBarC,activeCI.map(c=>`CO${c+1}`),activeCI.map(c=>R.coAttain[c]),'#1a3c6e',I.target);
+  const poBarC=document.createElement('canvas');poBarC.width=380;poBarC.height=200;
+  drawBar_light(poBarC,activePI.map(p=>`PO${p+1}`),activePI.map(p=>R.poAttain[p]),'#15803d',I.target);
+
+  let html=getHeaderHTML();
+  html+=`<div style="font-size:12pt;font-weight:700;color:#1a3c6e;margin-bottom:10px;text-align:center">COURSE OUTCOME ATTAINMENT — DETAILED REPORT</div>`;
+  // KPIs
+  html += ` <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px"> Number of Students: ${state.students.length}  -- Target Percentage:		${I.target}%  </div> `;
+  // Segment scores
+  html += `<div class="p-section"><h3>Student Marks</h3><table><thead>`;
+  html += `<tr><th>#</th><th style="text-align:left">Name</th>`;
+  state.segments.forEach(seg => html += `<th>${seg.name}<br><small>/${seg.fullMark}</small></th>`);
+  html += `<th>Total</th></tr></thead><tbody>`;
+  state.students.forEach((stu, si) => {
+    let studentTotal = 0;
+    html += `<tr><td>${si+1}</td><td style="text-align:left">${stu.name}</td>`;
+    
+    state.segments.forEach(seg => {
+      const t = (state.marks[si]?.[seg.id] || []).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+      studentTotal += t;
+      // Format individual segment marks the same way
+      const segmentFormatted = Math.abs(t - Math.round(t)) < 0.01 ? Math.round(t).toString() : t.toFixed(1);
+      html += `<td>${segmentFormatted}</td>`;
+    });
+    
+    // Format total: integer if whole number, else one decimal (e.g. 12.5)
+    const totalFormatted = Math.abs(studentTotal - Math.round(studentTotal)) < 0.01 ? Math.round(studentTotal).toString() : studentTotal.toFixed(1);
+    html += `<td><strong>${totalFormatted}</strong></td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  // Per-student CO attainment
+  html+=`<div class="p-section" style="page-break-before:always"><h3>Per-Student CO Attainment (%)</h3><table><thead><tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
+  activeCI.forEach(c=>html+=`<th>CO${c+1}<br><small>/${R.coMax[c].toFixed(0)}</small></th>`);
+  html+=`<th>Pass</th></tr></thead><tbody>`;
+  state.students.forEach((stu,si)=>{
+    const pass=activeCI.filter(c=>R.stuCOPct[si][c]!==null&&R.stuCOPct[si][c]>=I.target).length;
+    html+=`<tr><td>${si+1}</td><td style="text-align:left;font-size:8pt">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
+    activeCI.forEach(c=>{
+      const p=R.stuCOPct[si][c];
+      const ok=p>=I.target;
+      html+=`<td class="${ok?'tag-y':'tag-n'}" style="font-size:8pt">${p!==null?p.toFixed(1)+'%':'—'}</td>`;
+    });
+    html+=`<td><b>${pass}/${activeCI.length}</b></td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+
+  // CO summary again
+  html+=`<div class="p-section"><h3>Course Outcome (CO) Attainment Summary</h3><table><thead><tr><th>CO</th><th>n</th><th>N</th><th>%</th><th>Result</th></tr></thead><tbody>`;
+  for(let c=0;c<nCO;c++){
+    if(R.coMax[c]===0)continue;
+    const n=R.stuCOPct.filter(r=>r[c]>=I.target).length;
+    const tot=R.stuCOPct.filter(r=>r[c]!==null).length;
+    const ok=R.coAttain[c]>=I.target;
+    html+=`<tr><td>CO${c+1}</td><td>${n}</td><td>${tot}</td><td>${R.coAttain[c].toFixed(1)}%</td><td class="${ok?'tag-y':'tag-n'}">${ok?'Attained':'Below'}</td></tr>`;
+  }
+  html+=`</tbody></table></div>`;
+
+  // CO Charts
+  html+=`<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+    <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Radar</div><img src="${coCanvas.toDataURL()}" width="240"></div>
+    <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Bar</div><img src="${coBarC.toDataURL()}" width="320"></div>
+  </div>`;
+
+  // Per-student PO table (print version)
+  html += `<div class="p-section" style="page-break-before:always"><h3>Per-Student PO Attainment (%)</h3>`;
+  html += `<div class="tbl-wrap">`;
+  html += `<table><thead>`;
+  html += `<tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
+  activePI.forEach(p => html += `<th>PO${p+1}</th>`);
+  html += `<th>Pass</th></tr></thead><tbody>`;
+
+  state.students.forEach((stu, si) => {
+    const passCount = activePI.filter(p => R.stuPO[si][p] !== null && R.stuPO[si][p] >= I.target).length;
+    html += `<tr>`;
+    html += `<td>${si+1}</td>`;
+    html += `<td style="text-align:left;font-size:8pt">${stu.id}</td>`;
+    html += `<td style="text-align:left;font-size:8pt">${stu.name}</td>`;
+    activePI.forEach(p => {
+      const val = R.stuPO[si][p];
+      const ok = val !== null && val >= I.target;
+      html += `<td class="${ok ? 'tag-y' : 'tag-n'}" style="font-size:8pt">${val !== null ? val.toFixed(1)+'%' : '—'}</td>`;
+    });
+    html += `<td><b>${passCount}/${activePI.length}</b></td>`;
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+
+  // PO table
+  html+=`<div class="p-section"><h3>Programme Outcome (PO) Attainment Summary</h3><table><thead><tr><th>PO</th><th>Linked COs</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
+  for(let p=0;p<nPO;p++){
+    if (R.poAttain[p] === null) continue;  // skip if Not mapped
+    const linked=[...Array(nCO).keys()].filter(c=>(state.copo[c]?.[p]||0)>0).map(c=>`CO${c+1}`).join(', ')||'—';
+    const ok=R.poAttain[p]>=I.target;
+    html+=`<tr><td><b>PO${p+1}</b></td><td style="font-size:8pt">${linked}</td><td style="font-weight:700">${R.poAttain[p]!==null?R.poAttain[p].toFixed(1)+'%':'Not mapped'}</td><td class="${ok?'tag-y':'tag-n'}">${R.poAttain[p]!==null?(ok?'Attained':'Below Target'):'—'}</td></tr>`;
+  }
+  html+=`</tbody></table></div>`;
+
+  // PO Charts
+  html+=`<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+    <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Radar</div><img src="${poCanvas.toDataURL()}" width="240"></div>
+    <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Bar</div><img src="${poBarC.toDataURL()}" width="320"></div>
+  </div>`;
+
+  $('pd-content').innerHTML=html;
+  showEl('print-detail', true);
+  showEl('print-summary', false);
+  document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.add('no-print'));
+  // FIX: use raw ID string without '#', and add null check
+  const pageResults = $('page-results');
+  if (pageResults) pageResults.classList.add('print-target');
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      showEl('print-detail', false);
+      document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.remove('no-print'));
+      if (pageResults) pageResults.classList.remove('print-target');
+    }, 500);
+  }, 200);
+}
+
+// Light-mode chart versions for print
+function drawRadar_light(canvas,labels,data,color,target){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=Math.min(W,H)/2-34;
+  const n=labels.length;if(n<2)return;
+  const step=2*Math.PI/n;
+  [25,50,75,100].forEach(pct=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;const r=R*pct/100;const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.closePath();ctx.strokeStyle='#d1d5db';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='#888';ctx.font='9px monospace';ctx.fillText(pct+'%',cx+R*(pct/100)*Math.cos(-Math.PI/2)-12,cy+R*(pct/100)*Math.sin(-Math.PI/2)-4);
+  });
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.strokeStyle='#e5e7eb';ctx.stroke();}
+  ctx.beginPath();
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;const r=R*target/100;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}
+  ctx.closePath();ctx.strokeStyle='#f97316';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;const r=R*(Math.min(data[i]||0,100))/100;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}
+  ctx.closePath();ctx.fillStyle=color+'22';ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;const r=R*(Math.min(data[i]||0,100))/100;ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();}
+  ctx.fillStyle='#374151';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;const lx=cx+(R+16)*Math.cos(a),ly=cy+(R+16)*Math.sin(a);ctx.fillText(labels[i],lx,ly+4);}
+}
+function drawBar_light(canvas,labels,data,color,target){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  const padL=32,padR=10,padT=16,padB=30;
+  const chartW=W-padL-padR,chartH=H-padT-padB;
+  const n=labels.length;if(!n)return;
+  const barW=Math.min(38,(chartW/n)-6);
+  [0,25,50,75,100].forEach(pct=>{
+    const y=padT+chartH*(1-pct/100);
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+chartW,y);ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='#9ca3af';ctx.font='9px monospace';ctx.textAlign='right';ctx.fillText(pct,padL-3,y+3);
+  });
+  const ty=padT+chartH*(1-target/100);
+  ctx.beginPath();ctx.moveTo(padL,ty);ctx.lineTo(padL+chartW,ty);ctx.strokeStyle='#f97316';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+  const gap=chartW/n;
+  for(let i=0;i<n;i++){
+    const v=Math.min(data[i]||0,100);const bh=chartH*v/100;
+    const bx=padL+i*gap+(gap-barW)/2;const by=padT+chartH-bh;
+    const ok=v>=target;
+    ctx.fillStyle=ok?color:color+'66';
+    ctx.beginPath();ctx.rect(bx,by,barW,bh);ctx.fill();
+    ctx.fillStyle='#374151';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText(v.toFixed(1),bx+barW/2,by-3);
+    ctx.fillStyle='#6b7280';ctx.font='10px sans-serif';ctx.fillText(labels[i],bx+barW/2,padT+chartH+16);
+  }
+}
+
+// ─────────────────────────────────────────────
+// EXPORT / IMPORT
+// ─────────────────────────────────────────────
+function exportJSON(){
+  if(!state.info.code){toast('No active course','warn');return;}
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(state.info.code||'course')+'_CO_PO.json';a.click();
+  toast('Exported successfully','success');
+}
+function importJSON(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      state=data;
+      saveCourseToStorage();
+      renderCourses();
+      toast('Course imported: '+state.info.title,'success');
+    }catch(err){toast('Invalid JSON file','warn');}
+  };
+  reader.readAsText(file);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  buildSteps();
+  updateSteps();
+  renderCourses();
+
+  // go to marks page after students page
+  const origGoPage=goPage;
+  window._origGoPage=origGoPage;
+
+  // Auto-render sub-pages when navigating to them
+  const pageInits={
+    'page-info': prefillInfo,
+    'page-marks': renderMarksPage,
+    'page-results': ()=>{if(state.results)renderResults();}
+  };
+  // Monkey-patch not needed; handled in each button
+
+  // Drag-over for paste zone
+  const pz=$('paste-zone');
+  pz.addEventListener('dragover',e=>{e.preventDefault();pz.classList.add('dragover')});
+  pz.addEventListener('dragleave',()=>pz.classList.remove('dragover'));
+});
+
+// Override goPage to also init sub-pages
+const _goPage=goPage;
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  currentPage=id;
+  updateSteps();
+  window.scrollTo(0,0);
+  if(id==='page-info')prefillInfo();
+  if(id==='page-marks')renderMarksPage();
+  if(id==='page-results'&&state.results)renderResults();
+}
+
+
+// ─────────────────────────────────────────────
+// THEME TOGGLE (Dark/Light)
+// ─────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('bubt_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  setTheme(theme);
+}
+
+function setTheme(theme) {
+  const html = document.documentElement;
+  if (theme === 'light') {
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('bubt_theme', 'light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.innerHTML = '☀️ Light';
+  } else {
+    html.removeAttribute('data-theme'); // fallback to dark (default)
+    localStorage.setItem('bubt_theme', 'dark');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.innerHTML = '🌙 Dark';
+  }
+  // If results page is open, redraw charts to match new theme
+  if (currentPage === 'page-results' && state.results) {
+    renderResults(); // this will redraw charts with correct isDark flag
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  setTheme(isLight ? 'dark' : 'light');
+}
+
+// Attach event listener after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  const toggleBtn = document.getElementById('themeToggle');
+  if (toggleBtn) toggleBtn.addEventListener('click', toggleTheme);
+});
+</script>
+</body>
+</html>
