@@ -2470,7 +2470,9 @@
           <div style="font-size:9pt;color:#555;margin-top:2px">Semester: ${I.semester || ''} &nbsp;|&nbsp; Intake-Section: ${I.intake || ''}-${I.section || ''} &nbsp;|&nbsp; Code: ${I.code || ''} (${I.bnqf || ''})</div>
           <div style="font-size:9pt;color:#555">Course: <b>${I.title || ''}</b> &nbsp;|&nbsp; Teacher: ${I.teacher || ''} (${I.tcode || ''})</div>
         </div>
-        <div style="text-align:right;font-size:8pt;color:#999">Generated: ${new Date().toLocaleDateString()}</div>
+        <div style="text-align:right;font-size:8pt;color:#999">
+          Generated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Dhaka' })}
+        </div>
       </div>`;
     }
 
