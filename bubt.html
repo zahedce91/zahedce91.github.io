@@ -957,12 +957,11 @@
       }
     }
 
-    /* ── Print styles ── */
+/* ── Print styles ── */
     @media print {
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
-        /* Force light theme colors for ALL elements in print */
         --bg: #ffffff !important;
         --surface: #ffffff !important;
         --surface2: #f8fafc !important;
@@ -978,7 +977,7 @@
 
       @page {
         size: A4;
-        
+        margin: 14mm 12mm 16mm 12mm;
       }
 
       html,
@@ -986,9 +985,11 @@
         background: #fff !important;
         color: #111 !important;
         font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 9pt;
+        line-height: 1.45;
       }
 
-      /* Override any dark theme variables that might leak */
+      /* Override dark theme */
       html[data-theme="dark"],
       html[data-theme="dark"] body,
       html[data-theme="dark"] #app,
@@ -1009,11 +1010,14 @@
         --text: #0f172a !important;
       }
 
+      /* Hide interactive UI */
       #app>header,
       #progress-wrap,
       .no-print,
+      .developer-bar,
+      .alert,
       main>.page:not(.print-target) {
-        display: none !important
+        display: none !important;
       }
 
       .print-target {
@@ -1021,19 +1025,31 @@
         background: #fff !important;
       }
 
+      /* Print page container */
       .print-page {
-        page-break-after: always;
-        padding: 18mm 16mm;
         background: #fff !important;
         color: #111 !important;
+        padding: 0;
+        margin: 0;
       }
 
-      .print-page:last-child {
-        page-break-after: auto
+      .print-page+.print-page {
+        page-break-before: always;
+        /*break-inside: avoid; page-break-inside: avoid;*/
       }
 
-      /* Page numbers are injected via JS before printing */
+      /* Page number footer */
+      .page-number {
+        text-align: center;
+        font-size: 8pt;
+        color: #666;
+        font-family: 'IBM Plex Mono', monospace;
+        margin-top: 10px;
+        padding-top: 6px;
+        border-top: 1px solid #c0c8d8;
+      }
 
+      /* Print header */
       .ph {
         font-size: 10pt;
         color: #555
@@ -1045,41 +1061,83 @@
         margin-bottom: 6px
       }
 
+      /* Section headings */
       .p-section {
-        margin-bottom: 12px
+        margin-bottom: 10px;
       }
 
       .p-section h3 {
         font-size: 10pt;
         font-weight: 700;
         color: #1a3c6e;
-        border-bottom: 1px solid #c0c8d8;
+        border-bottom: 0.5px solid #1a3c6e;
         padding-bottom: 3px;
-        margin-bottom: 6px
+        margin-bottom: 6px;
+        margin-top: 12px;
       }
 
+      /* Print tables - optimized */
       table {
         border-collapse: collapse;
         width: 100%;
-        font-size: 8.5pt
+        font-size: 8pt;
+        page-break-inside: auto;
+      }
+
+      table thead {
+        display: table-header-group;
+      }
+
+      table tbody {
+        display: table-row-group;
+      }
+
+      table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
       }
 
       th {
-        background: #f1f5f9 !important;
-        color: #2563eb !important;
-        padding: 5px 8px;
-        text-align: center
+        background: #e8eef5 !important;
+        color: #1a3c6e !important;
+        padding: 5px 6px;
+        text-align: center;
+        border: 1px solid #94a3b8;
+        font-size: 7.5pt;
+        font-weight: 700;
+        font-family: 'IBM Plex Mono', monospace;
+        white-space: nowrap;
+      }
+
+      th.left {
+        text-align: left
       }
 
       td {
-        padding: 4px 8px;
+        padding: 4px 6px;
         border: 1px solid #c0c8d8;
-        text-align: center
+        text-align: center;
+        vertical-align: middle;
+        font-size: 8pt;
       }
 
+      td.left {
+        text-align: left
+      }
+
+      /* Zebra striping for print */
+      tr:nth-child(even) td {
+        background: #f6f8fb !important;
+      }
+
+      tr:nth-child(odd) td {
+        background: #fff !important;
+      }
+
+      /* KPI boxes for print */
       .kpi-print {
         display: inline-block;
-        border: 1px solid #c0c8d8;
+        border: 1px solid #94a3b8;
         border-radius: 6px;
         padding: 6px 14px;
         margin: 4px;
@@ -1087,51 +1145,92 @@
       }
 
       .kpi-print .v {
-        font-size: 18pt;
+        font-size: 16pt;
         font-weight: 700;
         color: #1a3c6e
       }
 
       .kpi-print .l {
-        font-size: 7.5pt;
-        color: #555
+        font-size: 7pt;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
+      /* Chart containers */
       canvas {
         max-width: 260px !important
       }
 
+      .chart-print-wrap {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      /* Tags - simplified for print */
       .tag-y {
         background: transparent !important;
-        color: #166534 !important;
+        color: #15803d !important;
         font-weight: 700;
       }
 
       .tag-n {
-        background: #f1f5f9 !important;
+        background:#2F1A20 !important;
         color: #991b1b !important;
         font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
       }
 
       .tag-na {
         background: transparent !important;
-        color: #555 !important;
+        color: #888 !important;
       }
 
-      .developer-bar {
-        display: none;
+      /* Signature block */
+      .signature-block {
+        margin-top: 40px;
+        page-break-inside: avoid;
       }
 
-      .alert {
-        display: none !important;
+      .signature-block table {
+        width: 100%;
+        border: none;
       }
 
+      .signature-block td {
+        border: none;
+        padding: 30px 10px 0;
+        vertical-align: bottom;
+        font-size: 9pt;
+      }
+
+      .signature-line {
+        border-bottom: 1px solid #333;
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+        min-height: 30px;
+      }
+
+      /* Wide table wrapper */
       .tbl-wrap {
         border: none;
+        overflow: visible;
+      }
+
+      /* Print footer */
+      .print-footer {
+        text-align: center;
+        font-size: 7pt;
+        color: #999;
+        margin-top: 8px;
+        padding-top: 4px;
+        border-top: 0.5px solid #ddd;
       }
     }
   </style>
   <base target="_blank">
+<base target="_blank">
 </head>
 
 <body>
@@ -1717,19 +1816,19 @@
       if (type === 'lab') {
         state.segments = [
           { id: uid(), name: 'Lab Evaluation', fullMark: 25, nQuestions: 4 },
-          { id: uid(), name: 'Class Attendance', fullMark: 5, nQuestions: 1 },
-          { id: uid(), name: 'Mid Term', fullMark: 30, nQuestions: 4 },
-          { id: uid(), name: 'Final', fullMark: 40, nQuestions: 6 }
+          { id: uid(), name: 'Mid Term', fullMark: 30, nQuestions: 3 },
+          { id: uid(), name: 'Final', fullMark: 40, nQuestions: 4 },
+          { id: uid(), name: 'C. A.', fullMark: 5, nQuestions: 1 }
         ];
         toast('Lab course preset applied (4 segments)', 'success');
       } else if (type === 'theory') {
         state.segments = [
-          { id: uid(), name: 'Class Attendance', fullMark: 5, nQuestions: 1 },
-          { id: uid(), name: 'Class Test - 1', fullMark: 7.5, nQuestions: 4 },
-          { id: uid(), name: 'Class Test - 2', fullMark: 7.5, nQuestions: 4 },
+          { id: uid(), name: 'CT - 1', fullMark: 7.5, nQuestions: 2 },
+          { id: uid(), name: 'CT - 2', fullMark: 7.5, nQuestions: 2 },
           { id: uid(), name: 'Assignment', fullMark: 10, nQuestions: 3 },
-          { id: uid(), name: 'Mid Term', fullMark: 30, nQuestions: 4 },
-          { id: uid(), name: 'Final', fullMark: 40, nQuestions: 6 }
+          { id: uid(), name: 'Mid Term', fullMark: 30, nQuestions: 3 },
+          { id: uid(), name: 'Final', fullMark: 40, nQuestions: 4 },
+          { id: uid(), name: 'C. A.', fullMark: 5, nQuestions: 1 }
         ];
         toast('Theory course preset applied (6 segments)', 'success');
       }
@@ -2322,9 +2421,50 @@
     // ─────────────────────────────────────────────
     // PRINT
     // ─────────────────────────────────────────────
+    // ─────────────────────────────────────────────
+    // PRINT
+    // ─────────────────────────────────────────────
+
+    /**
+     * Shared helper: generate all 4 charts for print and return data URLs.
+     * Eliminates code duplication between printSummary() and printDetail().
+     */
+    function generatePrintCharts(activeCI, activePI, R, I) {
+      const charts = {};
+
+      // CO Radar
+      const coCanvas = document.createElement('canvas');
+      coCanvas.width = 280; coCanvas.height = 280;
+      drawRadar_light(coCanvas, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
+      charts.coRadar = coCanvas.toDataURL();
+
+      // PO Radar
+      const poCanvas = document.createElement('canvas');
+      poCanvas.width = 280; poCanvas.height = 280;
+      drawRadar_light(poCanvas, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
+      charts.poRadar = poCanvas.toDataURL();
+
+      // CO Bar
+      const coBarC = document.createElement('canvas');
+      coBarC.width = 340; coBarC.height = 240;
+      drawBar_light(coBarC, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
+      charts.coBar = coBarC.toDataURL();
+
+      // PO Bar
+      const poBarC = document.createElement('canvas');
+      poBarC.width = 340; poBarC.height = 240;
+      drawBar_light(poBarC, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
+      charts.poBar = poBarC.toDataURL();
+
+      return charts;
+    }
+
+    /**
+     * Shared helper: build the report header with course metadata.
+     */
     function getHeaderHTML() {
       const I = state.info;
-      return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #1a3c6e;padding-bottom:8px">
+      return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;border-bottom:1px solid #1a3c6e;padding-bottom:8px">
         <div>
           <div style="font-size:13pt;font-weight:800;color:#1a3c6e">${I.uni || 'BUBT'}</div>
           <div style="font-size:9pt;color:#555;margin-top:2px">Semester: ${I.semester || ''} &nbsp;|&nbsp; Intake-Section: ${I.intake || ''}-${I.section || ''} &nbsp;|&nbsp; Code: ${I.code || ''} (${I.bnqf || ''})</div>
@@ -2334,26 +2474,155 @@
       </div>`;
     }
 
+    /**
+     * Shared helper: build KPI summary boxes for the top of reports.
+     */
+    function getKPISummaryHTML(R, I, activeCI, activePI) {
+      /*return `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;justify-content:center">
+        <div class="kpi-print"><div class="v">${state.students.length}</div><div class="l">Students</div></div>
+        <div class="kpi-print"><div class="v">${activeCI.length}</div><div class="l">Active COs</div></div>
+        <div class="kpi-print"><div class="v">${activePI.length}</div><div class="l">Active POs</div></div>
+        <div class="kpi-print"><div class="v">${I.target}%</div><div class="l">Target</div></div>
+      </div>`;*/
+      return `<div class="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;justify-content:center">
+        <h3>Number of Students: ${state.students.length}  -- Target Percentage: ${I.target}% </h3>
+      </div> `;
+    }
+
+    /**
+     * Shared helper: build the CO attainment summary table.
+     */
+    function getCOAttainmentTable(R, I, nCO) {
+      let html = `<div class="p-section"><h3>Course Outcome (CO) Attainment</h3>
+      <table><thead><tr><th>CO</th><th>Max Marks</th><th>n (≥${I.target}%)</th><th>N</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
+      for (let c = 0; c < nCO; c++) {
+        const n = R.stuCOPct.filter(r => r[c] !== null && r[c] >= I.target).length;
+        const tot = R.stuCOPct.filter(r => r[c] !== null).length;
+        const ok = R.coAttain[c] >= I.target;
+        const isActive = R.coMax[c] > 0;
+        html += `<tr>
+          <td><b>CO${c + 1}</b></td>
+          <td>${isActive ? R.coMax[c].toFixed(1) : '—'}</td>
+          <td>${isActive ? n : '—'}</td>
+          <td>${isActive ? tot : '—'}</td>
+          <td style="font-weight:700">${isActive ? R.coAttain[c].toFixed(1) + '%' : '—'}</td>
+          <td class="${ok ? 'tag-y' : 'tag-n'}">${isActive ? (ok ? 'Attained' : 'Below Target') : '—'}</td>
+        </tr>`;
+      }
+      html += `</tbody></table></div>`;
+      return html;
+    }
+
+    /**
+     * Shared helper: build the PO attainment summary table.
+     */
+    function getPOAttainmentTable(R, I, nCO, nPO) {
+      let html = `<div class="p-section"><h3>Programme Outcome (PO) Attainment</h3>
+      <table><thead><tr><th>PO</th><th>Linked COs</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
+      for (let p = 0; p < nPO; p++) {
+        if (R.poAttain[p] === null) continue;
+        const linked = [...Array(nCO).keys()].filter(c => (state.copo[c]?.[p] || 0) > 0).map(c => `CO${c + 1}`).join(', ') || '—';
+        const ok = R.poAttain[p] >= I.target;
+        html += `<tr>
+          <td><b>PO${p + 1}</b></td>
+          <td style="font-size:7.5pt">${linked}</td>
+          <td style="font-weight:700">${R.poAttain[p].toFixed(1)}%</td>
+          <td class="${ok ? 'tag-y' : 'tag-n'}">${ok ? 'Attained' : 'Below Target'}</td>
+        </tr>`;
+      }
+      html += `</tbody></table></div>`;
+      return html;
+    }
+
+    /**
+     * Shared helper: build chart display HTML for a pair of charts.
+     */
+    function getChartsHTML(coRadar, coBar, poRadar, poBar) {
+      return `<div style="break-inside:avoid;page-break-inside:avoid" class="chart-print-wrap">
+        <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;align-items:flex-start">
+          <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px">CO Attainment Radar</div><img src="${coRadar}" width="260" style="max-width:260px"></div>
+          <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px">CO Attainment Bar</div><img src="${coBar}" width="320" style="max-width:320px"></div>
+        </div>
+      </div>
+      <div style="break-inside:avoid;page-break-inside:avoid" class="chart-print-wrap">
+        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;align-items:flex-start">
+          <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px">PO Attainment Radar</div><img src="${poRadar}" width="260" style="max-width:260px"></div>
+          <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px">PO Attainment Bar</div><img src="${poBar}" width="320" style="max-width:320px"></div>
+        </div>
+      </div>`;
+    }
+
+    /**
+     * Shared helper: build signature block for detail reports.
+     */
+    function getSignatureBlock(I) {
+      return `<div class="signature-block">
+        <div style="font-size:9pt;font-weight:700;color:#1a3c6e;margin-bottom:12px;border-bottom:1px solid #1a3c6e;padding-bottom:3px;display:inline-block">Verification & Approval</div>
+        <table><tr>
+          <td style="width:45%;padding-top:30px">
+            <div class="signature-line" style="border-bottom:1px solid #333;padding-bottom:4px;margin-bottom:4px"></div>
+            <div style="font-size:8pt;color:#555">Prepared by</div>
+            <div style="font-size:9pt;font-weight:700">${I.teacher || '_________________'}</div>
+            <div style="font-size:7.5pt;color:#888">${I.tcode || ''}</div>
+          </td>
+          <td style="width:10%"></td>
+          <td style="width:45%;padding-top:30px">
+            <div class="signature-line" style="border-bottom:1px solid #333;padding-bottom:4px;margin-bottom:4px"></div>
+            <div style="font-size:8pt;color:#555">Verified by </div>
+            <div style="font-size:9pt;font-weight:700">_________________</div>
+            <div style="font-size:7.5pt;color:#888">Date: _______________</div>
+          </td>
+        </tr></table>
+      </div>`;
+    }
+
+    /**
+     * Shared helper: inject page numbers into each .print-page within a container.
+     */
     function injectPageNumbers(containerId) {
       const container = $(containerId);
       if (!container) return;
       const pages = container.querySelectorAll('.print-page');
       const total = pages.length;
       pages.forEach((page, idx) => {
-        // Remove any existing page number
         const existing = page.querySelector('.page-number');
         if (existing) existing.remove();
-        // Add new page number
         const pn = document.createElement('div');
         pn.className = 'page-number';
-        pn.style.cssText = `text-align:center;font-size:9pt;color:#555;font-family:'IBM Plex Mono',monospace;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;`;
+        pn.style.cssText = `text-align:center;font-size:8pt;color:#666;font-family:'IBM Plex Mono',monospace;margin-top:10px;padding-top:6px;border-top:1px solid #c0c8d8;`;
         pn.textContent = (idx === total - 1)
-          ? 'Page ' + (idx + 1) + ' of ' + total + ' (End of Report)'
+          ? 'Page ' + (idx + 1) + ' of ' + total + '  —  End of Report'
           : 'Page ' + (idx + 1) + ' of ' + total;
         page.appendChild(pn);
       });
     }
 
+    /**
+     * Shared helper: prepare print environment and trigger browser print.
+     */
+    function triggerPrint(containerId, onCleanup) {
+      showEl(containerId, true);
+      //injectPageNumbers(containerId);
+
+      // Hide the regular results panel, mark page-results as print target
+      document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.add('no-print'));
+      const pageResults = $('page-results');
+      if (pageResults) pageResults.classList.add('print-target');
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          showEl(containerId, false);
+          document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.remove('no-print'));
+          if (pageResults) pageResults.classList.remove('print-target');
+          if (onCleanup) onCleanup();
+        }, 600);
+      }, 250);
+    }
+
+    /**
+     * PRINT SUMMARY — Optimized, concise 1-2 page report with key outcomes.
+     */
     function printSummary() {
       const R = state.results; if (!R) { toast('Calculate results first', 'warn'); return; }
       const I = state.info;
@@ -2361,67 +2630,47 @@
       const activeCI = [...Array(nCO).keys()].filter(c => R.coMax[c] > 0);
       const activePI = [...Array(nPO).keys()].filter(p => R.poAttain[p] !== null);
 
-      const coCanvas = document.createElement('canvas'); coCanvas.width = 280; coCanvas.height = 280;
-      drawRadar_light(coCanvas, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
-      const poCanvas = document.createElement('canvas'); poCanvas.width = 280; poCanvas.height = 280;
-      drawRadar_light(poCanvas, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
+      // Generate charts once
+      const charts = generatePrintCharts(activeCI, activePI, R, I);
 
-      const coBarC = document.createElement('canvas'); coBarC.width = 320; coBarC.height = 250;
-      drawBar_light(coBarC, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
-      const poBarC = document.createElement('canvas'); poBarC.width = 320; poBarC.height = 250;
-      drawBar_light(poBarC, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
+      // Build the summary report as a single print-page
+      let html = '';
+      html += `<div class="print-page">`;
+      html += getHeaderHTML();
+      html += `<div style="font-size:12pt;font-weight:700;color:#1a3c6e;margin-bottom:6px;text-align:center;border-bottom:1px solid #c0c8d8;padding-bottom:6px">COURSE OUTCOME ATTAINMENT — SUMMARY REPORT</div>`;
+      html += getKPISummaryHTML(R, I, activeCI, activePI);
 
-      let html = getHeaderHTML();
-      html += `<div style="font-size:12pt;font-weight:700;color:#1a3c6e;margin-bottom:10px;text-align:center">COURSE OUTCOME ATTAINMENT — SUMMARY REPORT</div>`;
-      html += ` <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px"> Number of Students: ${state.students.length}  -- Target Percentage: ${I.target}%  </div> `;
-
-      html += `<div class="p-section"><h3>Course Outcome (CO) Attainment</h3><table><thead><tr><th>CO</th><th>Max Marks</th><th>n (≥${I.target}%)</th><th>N</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
-      for (let c = 0; c < nCO; c++) {
-        const n = R.stuCOPct.filter(r => r[c] !== null && r[c] >= I.target).length;
-        const tot = R.stuCOPct.filter(r => r[c] !== null).length;
-        const ok = R.coAttain[c] >= I.target;
-        html += `<tr><td><b>CO${c + 1}</b></td><td>${R.coMax[c] > 0 ? R.coMax[c].toFixed(1) : '—'}</td><td>${R.coMax[c] > 0 ? n : '—'}</td><td>${R.coMax[c] > 0 ? tot : '—'}</td><td style="font-weight:700">${R.coMax[c] > 0 ? R.coAttain[c].toFixed(1) + '%' : 'Not assessed'}</td><td class="${ok ? 'tag-y' : 'tag-n'}">${R.coMax[c] > 0 ? (ok ? 'Attained' : 'Below Target') : '—'}</td></tr>`;
-      }
-      html += `</tbody></table></div>`;
-
-      html += `<div style="break-inside: avoid; page-break-inside: avoid; display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-        <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Radar</div><img src="${coCanvas.toDataURL()}" width="280"></div>
-        <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Bar</div><img src="${coBarC.toDataURL()}" width="320"></div>
+      // CO Section
+      html += getCOAttainmentTable(R, I, nCO);
+      html += `<div style="break-inside:avoid;page-break-inside:avoid" class="chart-print-wrap">
+        <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;align-items:flex-start">
+          <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px">CO Attainment Radar</div><img src="${charts.coRadar}" width="260" style="max-width:260px"></div>
+          <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px">CO Attainment Bar</div><img src="${charts.coBar}" width="320" style="max-width:320px"></div>
+        </div>
       </div>`;
 
-      html += `<div class="p-section"><h3>Programme Outcome (PO) Attainment</h3><table><thead><tr><th>PO</th><th>Linked COs</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
-      for (let p = 0; p < nPO; p++) {
-        if (R.poAttain[p] === null) continue;
-        const linked = [...Array(nCO).keys()].filter(c => (state.copo[c]?.[p] || 0) > 0).map(c => `CO${c + 1}`).join(', ') || '—';
-        const ok = R.poAttain[p] >= I.target;
-        html += `<tr><td><b>PO${p + 1}</b></td><td style="font-size:8pt">${linked}</td><td style="font-weight:700">${R.poAttain[p] !== null ? R.poAttain[p].toFixed(1) + '%' : 'Not mapped'}</td><td class="${ok ? 'tag-y' : 'tag-n'}">${R.poAttain[p] !== null ? (ok ? 'Attained' : 'Below Target') : '—'}</td></tr>`;
-      }
-      html += `</tbody></table></div>`;
-
-      html += `<div style="break-inside: avoid; page-break-inside: avoid; display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-        <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Radar</div><img src="${poCanvas.toDataURL()}" width="280"></div>
-        <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Bar</div><img src="${poBarC.toDataURL()}" width="320"></div>
+      // PO Section - new page if content is getting long
+      html += getPOAttainmentTable(R, I, nCO, nPO);
+      html += `<div style="break-inside:avoid;page-break-inside:avoid" class="chart-print-wrap">
+        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;align-items:flex-start">
+          <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px">PO Attainment Radar</div><img src="${charts.poRadar}" width="260" style="max-width:260px"></div>
+          <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px">PO Attainment Bar</div><img src="${charts.poBar}" width="320" style="max-width:320px"></div>
+        </div>
       </div>`;
+      html += getSignatureBlock(I);
+      html += `</div>`;
 
       $('ps-content').innerHTML = html;
       $('ps-content').style.background = '#fff';
       $('ps-content').style.color = '#111';
-      showEl('print-summary', true);
-      injectPageNumbers('ps-content');
-      showEl('print-detail', false);
-      document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.add('no-print'));
-      const pageResults = $('page-results');
-      if (pageResults) pageResults.classList.add('print-target');
-      setTimeout(() => {
-        window.print();
-        setTimeout(() => {
-          showEl('print-summary', false);
-          document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.remove('no-print'));
-          if (pageResults) pageResults.classList.remove('print-target');
-        }, 500);
-      }, 200);
+      triggerPrint('print-summary', () => {
+        // any summary-specific cleanup
+      });
     }
 
+    /**
+     * PRINT DETAIL — Comprehensive multi-page report with all student data.
+     */
     function printDetail() {
       const R = state.results; if (!R) { toast('Calculate results first', 'warn'); return; }
       const I = state.info;
@@ -2429,121 +2678,107 @@
       const activeCI = [...Array(nCO).keys()].filter(c => R.coMax[c] > 0);
       const activePI = [...Array(nPO).keys()].filter(p => R.poAttain[p] !== null);
 
-      const coCanvas = document.createElement('canvas'); coCanvas.width = 280; coCanvas.height = 280;
-      drawRadar_light(coCanvas, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
-      const poCanvas = document.createElement('canvas'); poCanvas.width = 280; poCanvas.height = 280;
-      drawRadar_light(poCanvas, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
+      // Generate charts once
+      const charts = generatePrintCharts(activeCI, activePI, R, I);
 
-      const coBarC = document.createElement('canvas'); coBarC.width = 320; coBarC.height = 250;
-      drawBar_light(coBarC, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
-      const poBarC = document.createElement('canvas'); poBarC.width = 320; poBarC.height = 250;
-      drawBar_light(poBarC, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
+      // Page 1: Header + Student Marks
+      let html = '';
+      html += `<div class="print-page">`;
+      html += getHeaderHTML();
+      html += `<div style="font-size:12pt;font-weight:700;color:#1a3c6e;margin-bottom:6px;text-align:center;border-bottom:1px solid #c0c8d8;padding-bottom:6px">COURSE OUTCOME ATTAINMENT — DETAILED REPORT</div>`;
 
-      let html = getHeaderHTML();
-      html += `<div style="font-size:12pt;font-weight:700;color:#1a3c6e;margin-bottom:10px;text-align:center">COURSE OUTCOME ATTAINMENT — DETAILED REPORT</div>`;
-      html += ` <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px"> Number of Students: ${state.students.length}  -- Target Percentage: ${I.target}%  </div> `;
-
-      html += `<div class="p-section"><h3>Student Marks</h3><table><thead>`;
-      html += `<tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
+      // Student Marks per Segment
+      html += `<div class="p-section"><h3>Student Marks by Assessment Segment</h3>`;
+      html += `<table><thead><tr><th>#</th><th style="text-align:left">Student ID</th><th style="text-align:left">Name</th>`;
       state.segments.forEach(seg => html += `<th>${seg.name}<br><small>/${seg.fullMark}</small></th>`);
       html += `<th>Total</th></tr></thead><tbody>`;
       state.students.forEach((stu, si) => {
         let studentTotal = 0;
-        html += `<tr><td>${si + 1}</td><td style="text-align:left">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
+        html += `<tr><td>${si + 1}</td><td style="text-align:left;font-size:7.5pt;font-family:'IBM Plex Mono',monospace">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
         state.segments.forEach(seg => {
           const t = (state.marks[si]?.[seg.id] || []).reduce((a, b) => a + (parseFloat(b) || 0), 0);
           studentTotal += t;
-          const segmentFormatted = Math.abs(t - Math.round(t)) < 0.01 ? Math.round(t).toString() : t.toFixed(1);
-          html += `<td>${segmentFormatted}</td>`;
+          const fmt = Math.abs(t - Math.round(t)) < 0.01 ? Math.round(t).toString() : t.toFixed(1);
+          html += `<td>${fmt}</td>`;
         });
-        const totalFormatted = Math.abs(studentTotal - Math.round(studentTotal)) < 0.01 ? Math.round(studentTotal).toString() : studentTotal.toFixed(1);
-        html += `<td><strong>${totalFormatted}</strong></td></tr>`;
+        const totalFmt = Math.abs(studentTotal - Math.round(studentTotal)) < 0.01 ? Math.round(studentTotal).toString() : studentTotal.toFixed(1);
+        html += `<td style="font-weight:700">${totalFmt}</td></tr>`;
       });
       html += `</tbody></table></div>`;
+      //html += `</div>`;
 
-      html += `<div class="p-section" style="break-inside: avoid; page-break-inside: avoid;"><h3>Per-Student CO Attainment (%)</h3><table><thead><tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
+      //KPI 
+      html += getKPISummaryHTML(R, I, activeCI, activePI);
+
+      // Page 2: Per-Student CO Attainment
+      //html += `<div class="print-page">`;
+      //html += getHeaderHTML();
+      html += `<div class="p-section"><h3>Per-Student CO Attainment (%)</h3>`;
+      html += `<table><thead><tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
       activeCI.forEach(c => html += `<th>CO${c + 1}<br><small>/${R.coMax[c].toFixed(0)}</small></th>`);
       html += `<th>Pass</th></tr></thead><tbody>`;
       state.students.forEach((stu, si) => {
         const pass = activeCI.filter(c => R.stuCOPct[si][c] !== null && R.stuCOPct[si][c] >= I.target).length;
-        html += `<tr><td>${si + 1}</td><td style="text-align:left;font-size:8pt">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
+        html += `<tr><td>${si + 1}</td><td style="text-align:left;font-size:7pt;font-family:'IBM Plex Mono',monospace">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
         activeCI.forEach(c => {
           const p = R.stuCOPct[si][c];
           const ok = p >= I.target;
-          html += `<td class="${ok ? 'tag-y' : 'tag-n'}" style="font-size:8pt">${p !== null ? p.toFixed(1) + '%' : '—'}</td>`;
+          html += `<td class="${ok ? 'tag-y' : 'tag-n'}" style="font-size:7.5pt">${p !== null ? p.toFixed(1) + '%' : '—'}</td>`;
         });
         html += `<td><b>${pass}/${activeCI.length}</b></td></tr>`;
       });
       html += `</tbody></table></div>`;
+      //html += `</div>`;
 
-      html += `<div class="p-section" style="break-inside: avoid; page-break-inside: avoid;"><h3>Course Outcome (CO) Attainment Summary</h3><table><thead><tr><th>CO</th><th>n</th><th>N</th><th>%</th><th>Result</th></tr></thead><tbody>`;
-      for (let c = 0; c < nCO; c++) {
-        if (R.coMax[c] === 0) continue;
-        const n = R.stuCOPct.filter(r => r[c] >= I.target).length;
-        const tot = R.stuCOPct.filter(r => r[c] !== null).length;
-        const ok = R.coAttain[c] >= I.target;
-        html += `<tr><td>CO${c + 1}</td><td>${n}</td><td>${tot}</td><td>${R.coAttain[c].toFixed(1)}%</td><td class="${ok ? 'tag-y' : 'tag-n'}">${ok ? 'Attained' : 'Below'}</td></tr>`;
-      }
-      html += `</tbody></table></div>`;
-
-      html += `<div style="break-inside: avoid; page-break-inside: avoid; display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-        <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Radar</div><img src="${coCanvas.toDataURL()}" width="240"></div>
-        <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:4px">CO Attainment Bar</div><img src="${coBarC.toDataURL()}" width="320"></div>
+      // Page 3: CO Summary + CO Charts
+      //html += `<div class="print-page">`;
+      //html += getHeaderHTML();
+      html += getCOAttainmentTable(R, I, nCO);
+      html += `<div style="break-inside:avoid;page-break-inside:avoid" class="chart-print-wrap">
+        <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;align-items:flex-start">
+          <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px">CO Attainment Radar</div><img src="${charts.coRadar}" width="260" style="max-width:260px"></div>
+          <div><div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px">CO Attainment Bar</div><img src="${charts.coBar}" width="320" style="max-width:320px"></div>
+        </div>
       </div>`;
+      //html += `</div>`;
 
-      html += `<div class="p-section" style="break-inside: avoid; page-break-inside: avoid;"><h3>Per-Student PO Attainment (%)</h3>`;
-      html += `<div class="tbl-wrap">`;
-      html += `<table><thead>`;
-      html += `<tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
+      // Page 4: Per-Student PO Attainment
+      //html += `<div class="print-page">`;
+      //html += getHeaderHTML();
+      html += `<div class="p-section"><h3>Per-Student PO Attainment (%)</h3>`;
+      html += `<table><thead><tr><th>#</th><th style="text-align:left">ID</th><th style="text-align:left">Name</th>`;
       activePI.forEach(p => html += `<th>PO${p + 1}</th>`);
       html += `<th>Pass</th></tr></thead><tbody>`;
       state.students.forEach((stu, si) => {
         const passCount = activePI.filter(p => R.stuPO[si][p] !== null && R.stuPO[si][p] >= I.target).length;
-        html += `<tr>`;
-        html += `<td>${si + 1}</td>`;
-        html += `<td style="text-align:left;font-size:8pt">${stu.id}</td>`;
-        html += `<td style="text-align:left;font-size:8pt">${stu.name}</td>`;
+        html += `<tr><td>${si + 1}</td><td style="text-align:left;font-size:7pt;font-family:'IBM Plex Mono',monospace">${stu.id}</td><td style="text-align:left">${stu.name}</td>`;
         activePI.forEach(p => {
           const val = R.stuPO[si][p];
           const ok = val !== null && val >= I.target;
-          html += `<td class="${ok ? 'tag-y' : 'tag-n'}" style="font-size:8pt">${val !== null ? val.toFixed(1) + '%' : '—'}</td>`;
+          html += `<td class="${ok ? 'tag-y' : 'tag-n'}" style="font-size:7.5pt">${val !== null ? val.toFixed(1) + '%' : '—'}</td>`;
         });
-        html += `<td><b>${passCount}/${activePI.length}</b></td>`;
-        html += `</tr>`;
+        html += `<td><b>${passCount}/${activePI.length}</b></td></tr>`;
       });
-      html += `</tbody></table></div></div>`;
-
-      html += `<div class="p-section" style="break-inside: avoid; page-break-inside: avoid;"><h3>Programme Outcome (PO) Attainment Summary</h3><table><thead><tr><th>PO</th><th>Linked COs</th><th>Attainment %</th><th>Result</th></tr></thead><tbody>`;
-      for (let p = 0; p < nPO; p++) {
-        if (R.poAttain[p] === null) continue;
-        const linked = [...Array(nCO).keys()].filter(c => (state.copo[c]?.[p] || 0) > 0).map(c => `CO${c + 1}`).join(', ') || '—';
-        const ok = R.poAttain[p] >= I.target;
-        html += `<tr><td><b>PO${p + 1}</b></td><td style="font-size:8pt">${linked}</td><td style="font-weight:700">${R.poAttain[p] !== null ? R.poAttain[p].toFixed(1) + '%' : 'Not mapped'}</td><td class="${ok ? 'tag-y' : 'tag-n'}">${R.poAttain[p] !== null ? (ok ? 'Attained' : 'Below Target') : '—'}</td></tr>`;
-      }
       html += `</tbody></table></div>`;
+      //html += `</div>`;
 
-      html += `<div style="break-inside: avoid; page-break-inside: avoid; display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-        <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Radar</div><img src="${poCanvas.toDataURL()}" width="240"></div>
-        <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:4px">PO Attainment Bar</div><img src="${poBarC.toDataURL()}" width="320"></div>
+      // Page 5: PO Summary + PO Charts + Signature
+      //html += `<div class="print-page">`;
+      //html += getHeaderHTML();
+      html += getPOAttainmentTable(R, I, nCO, nPO);
+      html += `<div style="break-inside:avoid;page-break-inside:avoid" class="chart-print-wrap">
+        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;align-items:flex-start">
+          <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px">PO Attainment Radar</div><img src="${charts.poRadar}" width="260" style="max-width:260px"></div>
+          <div><div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px">PO Attainment Bar</div><img src="${charts.poBar}" width="320" style="max-width:320px"></div>
+        </div>
       </div>`;
+      html += getSignatureBlock(I);
+      html += `</div>`;
 
       $('pd-content').innerHTML = html;
       $('pd-content').style.background = '#fff';
       $('pd-content').style.color = '#111';
-      showEl('print-detail', true);
-      injectPageNumbers('pd-content');
-      showEl('print-summary', false);
-      document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.add('no-print'));
-      const pageResults = $('page-results');
-      if (pageResults) pageResults.classList.add('print-target');
-      setTimeout(() => {
-        window.print();
-        setTimeout(() => {
-          showEl('print-detail', false);
-          document.querySelectorAll('#page-results>.panel').forEach(p => p.classList.remove('no-print'));
-          if (pageResults) pageResults.classList.remove('print-target');
-        }, 500);
-      }, 200);
+      triggerPrint('print-detail');
     }
 
     function drawRadar_light(canvas, labels, data, color, target) {
