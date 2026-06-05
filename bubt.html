@@ -5,9 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CO/PO Assessment Tool</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       /* Light theme (default) */
@@ -980,6 +978,7 @@
 
       @page {
         size: A4;
+        
       }
 
       html,
@@ -1109,7 +1108,7 @@
       }
 
       .tag-n {
-        background: transparent !important;
+        background: #f1f5f9 !important;
         color: #991b1b !important;
         font-weight: 700;
       }
@@ -1132,7 +1131,6 @@
       }
     }
   </style>
-  <base target="_blank">
   <base target="_blank">
 </head>
 
@@ -1162,7 +1160,7 @@
     </header>
 
     <!-- PROGRESS -->
-    <div id="progress-wrap">
+    <div id="progress-wrap" style="position: sticky; top: 0; ">
       <div class="steps-row" id="steps-row"></div>
     </div>
 
@@ -1378,11 +1376,10 @@
       <div class="page" id="page-results">
         <div class="panel no-print">
           <div class="panel-title">Results & Analysis</div>
-          <div class="btn-row" style="margin-bottom:16px">
+          <div class="btn-row" style="margin-bottom:16px; position: sticky; top: 50px; ">
             <button class="btn btn-ghost" onclick="printSummary()">🖨 Print Summary (A4)</button>
             <button class="btn btn-primary" onclick="printDetail()">🖨 Print Detail (A4)</button>
-            <button class="btn btn-ghost" onclick="exportJSON()">⬇ Export JSON</button>
-            <button class="btn btn-ghost" onclick="exportExcel()">📊 Export Excel</button>
+            
           </div>
           <div id="results-body"></div>
         </div>
@@ -2369,9 +2366,9 @@
       const poCanvas = document.createElement('canvas'); poCanvas.width = 280; poCanvas.height = 280;
       drawRadar_light(poCanvas, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
 
-      const coBarC = document.createElement('canvas'); coBarC.width = 320; coBarC.height = 280;
+      const coBarC = document.createElement('canvas'); coBarC.width = 320; coBarC.height = 250;
       drawBar_light(coBarC, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
-      const poBarC = document.createElement('canvas'); poBarC.width = 320; poBarC.height = 280;
+      const poBarC = document.createElement('canvas'); poBarC.width = 320; poBarC.height = 250;
       drawBar_light(poBarC, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
 
       let html = getHeaderHTML();
@@ -2437,9 +2434,9 @@
       const poCanvas = document.createElement('canvas'); poCanvas.width = 280; poCanvas.height = 280;
       drawRadar_light(poCanvas, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
 
-      const coBarC = document.createElement('canvas'); coBarC.width = 320; coBarC.height = 280;
+      const coBarC = document.createElement('canvas'); coBarC.width = 320; coBarC.height = 250;
       drawBar_light(coBarC, activeCI.map(c => `CO${c + 1}`), activeCI.map(c => R.coAttain[c]), '#1a3c6e', I.target);
-      const poBarC = document.createElement('canvas'); poBarC.width = 320; poBarC.height = 280;
+      const poBarC = document.createElement('canvas'); poBarC.width = 320; poBarC.height = 250;
       drawBar_light(poBarC, activePI.map(p => `PO${p + 1}`), activePI.map(p => R.poAttain[p]), '#15803d', I.target);
 
       let html = getHeaderHTML();
