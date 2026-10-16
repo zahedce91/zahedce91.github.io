@@ -153,8 +153,22 @@ The OBE tab guides instructors through a 6-step accreditation pipeline:
   - Clicking **Build Gradebook From OBE Segments** automatically generates matching Gradebook columns, pre-allocates question weight breakdowns, and establishes the 2-way live sync channel.
   - New courses automatically initialize with standard OBE Theory or Lab assessment segments pre-configured from day one!
 
-### Step 8: Official Audited Reports & Exports
+### Step 8: Official Audited Reports & Master Portfolio
 
+- **5-Page Master Course Assessment Portfolio Dossier (A4)**: One-click compiled master accreditation dossier conforming to BAETE & Washington Accord requirements:
+  - **Page 1**: Official Cover Sheet & Course Overview with University Crest, Instructor Attribution & Table of Contents.
+  - **Page 2**: Course Outcomes (CO) Blueprint, Assessment Scheme & 16-Milestone Deliverables Compliance Checklist.
+  - **Page 3**: Consolidated Student Gradebook Marks Sheet & GPA Distribution Frequency Table.
+  - **Page 4**: Outcome-Based Education (OBE) Attainment Matrices, Radar Chart & Bar Charts for CO and PO Attainment.
+  - **Page 5**: Continuous Quality Improvement (CQI) Action Plan with Cohort Observations & 4-Party Endorsement Signatures (Course Teacher, Coordinator, Department Chair & Dean).
+- **Student 360° Performance Dossier Modal & Transcript Card**: Click on any Student ID or profile icon in the Gradebook to launch a 360° student modal featuring:
+  - 5-KPI Performance Strip (Total Score, Grade, GPA, Class Rank, Attendance, and COs Attained).
+  - Assessment itemization table with nested sub-question breakdowns (Q1, Q2...).
+  - Live Student CO Competency Radar Chart SVG comparing student mastery against the benchmark threshold.
+  - One-click printout of an official single-page A4 **Student Performance Transcript**.
+- **Main Gradebook Inline Sub-Question Expansion (`▶` / `◀`)**: Click `▶` on any column header in the Gradebook spreadsheet to expand sub-questions directly within the main grid. Enter question marks with real-time auto-summation to column totals and instant OBE sync.
+- **Quick Column Clone / Duplicate**: Clone assessments with a single click (e.g. duplicating `CT-1` into `CT-2`), automatically duplicating question maximums, weights, and mapped Course Outcomes.
+- **Column Reordering**: Move columns left or right with `◀` / `▶` controls in the column configuration editor.
 - **1-2 Page Executive Summary Report (A4)**: Formatted strictly for departmental filing and BAETE evaluators. Includes Institution logo, course metadata, Course Outcomes table, Light-Mode Radar Chart, CO-PO attainment matrix, CQI action plan, and official signature lines for Course Teacher and Department Head.
 - **Multi-Page Detailed Audit Report (A4)**: Full accreditation dossier with student-by-student question breakdown tables and complete attainment breakdown.
 - **Landscape Milestones Compliance Report**: Print directly from the Tracker tab in crisp landscape format.
