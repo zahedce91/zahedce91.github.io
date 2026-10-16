@@ -1256,6 +1256,7 @@
           <div style="display:flex;flex-wrap:wrap;gap:8px;">
             <button class="btn sm" id="btnToggleGpaGraph"><i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> <span id="lblGpaGraph">Show GPA Chart</span></button>
             <button class="btn sm" id="btnEditCourseDetails"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> Edit Course</button>
+            <button class="btn sm success" type="button" onclick="printCompleteCoursePortfolio(getActiveCourse())"><i data-lucide="file-check" style="width:14px;height:14px;"></i> Master Portfolio (A4)</button>
             <button class="btn sm primary" id="btnDownloadGradebook"><i data-lucide="download" style="width:14px;height:14px;"></i> Download Marks Sheet</button>
           </div>
         </div>
@@ -2571,17 +2572,70 @@
       `;
 
       course.gradebook.cols.forEach(col => {
-        const hasObeMatch = course.obe && course.obe.segments && course.obe.segments.some(s => s.source === 'col:' + col.k || (col.g && s.source === 'group:' + col.g));
-        ths += `
-          <th style="min-width:92px;">
-            <div style="display:flex;align-items:center;justify-content:center;gap:3px;">
-              <span style="font-weight:700;">${escapeHtml(col.l)}</span>
-              <button type="button" class="btn icon-only sm" style="width:18px;height:18px;padding:0;border:none;background:var(--brand-bg);color:var(--brand);border-radius:4px;cursor:pointer;" title="Enter / View Question-by-Question Breakdown for OBE" onclick="openQuestionBreakdownModal('${col.k}')">📝</button>
-              <button type="button" class="btn icon-only sm" style="width:18px;height:18px;padding:0;border:none;background:var(--bg-alt);color:var(--text);border-radius:4px;cursor:pointer;" title="Edit Assessment & OBE Questions Settings" onclick="openAddGradebookColModal('${col.k}')">⚙</button>
-            </div>
-            <small class="dim">/${col.max}</small>
-          </th>
-        `;
+        const seg = course.obe && course.obe.segments && course.obe.segments.find(s => s.source === 'col:' + col.k || (col.g && s.source === 'group:' + col.g));
+        const nq = seg ? (seg.nQuestions || 1) : (col.questionBreakdown ? (col.questionBreakdown.nQuestions || 1) : 1);
+        const isExpanded = !!(S.expandedCols && S.expandedCols[col.k]);
+
+        // Get question weights & CO mappings
+        const qWeights = [];
+        const qCos = [];
+        for (let q = 0; q < nq; q++) {
+          let qW = null;
+          let qCo = '';
+          if (seg && course.obe.coMap && course.obe.coMap[seg.id]) {
+            for (const [cIdx, row] of Object.entries(course.obe.coMap[seg.id])) {
+              if (row && row[q] > 0) {
+                qW = row[q];
+                qCo = `CO${+cIdx + 1}`;
+                break;
+              }
+            }
+          }
+          if (qW == null && col.questionBreakdown && col.questionBreakdown.weights) {
+            qW = col.questionBreakdown.weights[q];
+          }
+          if (qW == null) {
+            qW = Math.round((col.max || 0) / nq);
+          }
+          qWeights.push(qW);
+          qCos.push(qCo);
+        }
+
+        if (isExpanded && nq > 1) {
+          for (let q = 0; q < nq; q++) {
+            ths += `
+              <th style="min-width:54px;background:var(--brand-bg);border-left:1px dashed var(--brand);font-size:11px;padding:4px 2px;">
+                <div style="font-weight:700;color:var(--brand);display:flex;align-items:center;justify-content:center;gap:2px;">
+                  <span>Q${q + 1}</span>
+                  ${qCos[q] ? `<span style="font-size:9.5px;color:var(--text-muted);">${qCos[q]}</span>` : ''}
+                </div>
+                <small class="dim">/${qWeights[q]}</small>
+              </th>
+            `;
+          }
+          ths += `
+            <th style="min-width:88px;background:rgba(99,102,241,0.12);border-left:1px solid var(--brand);">
+              <div style="display:flex;align-items:center;justify-content:center;gap:3px;">
+                <span style="font-weight:800;color:var(--brand);">${escapeHtml(col.l)}</span>
+                <button type="button" class="btn icon-only sm" style="width:16px;height:16px;padding:0;border:none;background:var(--brand);color:#fff;border-radius:3px;cursor:pointer;font-size:9px;" onclick="toggleExpandCol('${col.k}')" title="Collapse sub-questions">◀</button>
+              </div>
+              <small class="dim">Total /${col.max}</small>
+            </th>
+          `;
+        } else {
+          ths += `
+            <th style="min-width:96px;">
+              <div style="display:flex;align-items:center;justify-content:center;gap:3px;">
+                <span style="font-weight:700;">${escapeHtml(col.l)}</span>
+                ${nq > 1 ? `<button type="button" class="btn icon-only sm" style="width:16px;height:16px;padding:0;border:none;background:var(--brand-bg);color:var(--brand);border-radius:3px;cursor:pointer;font-size:9px;" onclick="toggleExpandCol('${col.k}')" title="Expand into Q1, Q2.. in spreadsheet">▶</button>` : ''}
+                <button type="button" class="btn icon-only sm" style="width:18px;height:18px;padding:0;border:none;background:var(--brand-bg);color:var(--brand);border-radius:4px;cursor:pointer;" title="Enter / View Question-by-Question Breakdown for OBE" onclick="openQuestionBreakdownModal('${col.k}')">📝</button>
+                <button type="button" class="btn icon-only sm" style="width:18px;height:18px;padding:0;border:none;background:var(--bg-alt);color:var(--text);border-radius:4px;cursor:pointer;" title="Edit Assessment & OBE Questions Settings" onclick="openAddGradebookColModal('${col.k}')">⚙</button>
+              </div>
+              <small class="dim">/${col.max}${nq > 1 ? ` (${nq}Q)` : ''}</small>
+            </th>
+          `;
+        }
+
         if (S.showAggCols && col.g && col.g !== 'lab') {
           // If this is the last item of this group, append aggregate header
           const groupCols = course.gradebook.cols.filter(k => k.g === col.g);
@@ -2615,11 +2669,32 @@
         course.gradebook.cols.forEach(col => {
           const val = stu.m[col.k] ?? '';
           const isOver = typeof val === 'number' && (val > col.max || val < 0);
-          colInputs += `
-            <td>
-              <input type="text" class="${isOver ? 'over' : ''}" value="${val}" onchange="updateStudentMark('${course.id}', ${i}, '${col.k}', this.value)" placeholder="–">
-            </td>
-          `;
+          const seg = course.obe && course.obe.segments && course.obe.segments.find(s => s.source === 'col:' + col.k || (col.g && s.source === 'group:' + col.g));
+          const nq = seg ? (seg.nQuestions || 1) : (col.questionBreakdown ? (col.questionBreakdown.nQuestions || 1) : 1);
+          const isExpanded = !!(S.expandedCols && S.expandedCols[col.k]);
+
+          if (isExpanded && nq > 1) {
+            const qMarks = (course.obe && course.obe.questionMarks && course.obe.questionMarks[i] && seg && course.obe.questionMarks[i][seg.id]) ? course.obe.questionMarks[i][seg.id] : [];
+            for (let q = 0; q < nq; q++) {
+              const qVal = qMarks[q] != null ? qMarks[q] : '';
+              colInputs += `
+                <td style="padding:2px 3px;background:var(--bg-alt);">
+                  <input type="text" class="mono" style="width:48px;height:26px;text-align:center;font-size:11.5px;padding:0;" value="${qVal}" onchange="updateSubQuestionMark('${course.id}', ${i}, '${col.k}', '${seg ? seg.id : ''}', ${q}, this.value)" placeholder="–">
+                </td>
+              `;
+            }
+            colInputs += `
+              <td style="background:rgba(99,102,241,0.06);border-left:1px solid var(--brand);">
+                <input type="text" class="${isOver ? 'over' : ''}" style="font-weight:700;" value="${val}" onchange="updateStudentMark('${course.id}', ${i}, '${col.k}', this.value)" placeholder="–">
+              </td>
+            `;
+          } else {
+            colInputs += `
+              <td>
+                <input type="text" class="${isOver ? 'over' : ''}" value="${val}" onchange="updateStudentMark('${course.id}', ${i}, '${col.k}', this.value)" placeholder="–">
+              </td>
+            `;
+          }
 
           if (S.showAggCols && col.g && col.g !== 'lab') {
             const groupCols = course.gradebook.cols.filter(k => k.g === col.g);
@@ -2647,7 +2722,10 @@
             <td><input type="checkbox" ${isSelected ? 'checked' : ''} onclick="handleStudentSelectClick(${i}, event)"></td>
             <td class="mono">${i + 1}</td>
             <td><input type="text" value="${escapeHtml(stu.intake || course.intake)}" onchange="updateStudentField('${course.id}', ${i}, 'intake', this.value)"></td>
-            <td class="text-left"><input type="text" value="${escapeHtml(stu.id)}" onchange="updateStudentField('${course.id}', ${i}, 'id', this.value)" style="font-weight:700;"></td>
+            <td class="text-left" style="display:flex;align-items:center;gap:3px;">
+              <input type="text" value="${escapeHtml(stu.id)}" onchange="updateStudentField('${course.id}', ${i}, 'id', this.value)" style="font-weight:700;width:calc(100% - 24px);">
+              <button type="button" class="btn icon-only sm" style="width:20px;height:20px;padding:0;border:none;background:var(--brand-bg);color:var(--brand);border-radius:4px;cursor:pointer;" title="View Student 360° Dossier & CO Radar" onclick="openStudent360Modal(${i})">👤</button>
+            </td>
             <td class="text-left"><input type="text" value="${escapeHtml(stu.name)}" onchange="updateStudentField('${course.id}', ${i}, 'name', this.value)"></td>
             <td><input type="number" class="${isOverAtt ? 'over' : ''}" value="${stu.att ?? ''}" min="0" max="${course.classes || 14}" onchange="updateStudentField('${course.id}', ${i}, 'att', this.value)" placeholder="–"></td>
             <td class="mono" style="font-size:11px;">${r.attPct == null ? '–' : `${Math.round(r.attPct)}% &rarr; <b>${r.attMark}</b>`}</td>
@@ -4004,6 +4082,7 @@
             <span class="dim" style="font-size:11.5px;">Computed for ${course.gradebook.students.length} students &bull; BAETE/Washington Accord standards</span>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn sm success" type="button" onclick="printCompleteCoursePortfolio(getActiveCourse())"><i data-lucide="file-check" style="width:14px;height:14px;"></i> Master Portfolio (A4)</button>
             <button class="btn sm" onclick="printObeSummary(getActiveCourse())"><i data-lucide="printer" style="width:14px;height:14px;"></i> Print Summary (A4)</button>
             <button class="btn sm" onclick="printObeDetailed(getActiveCourse())"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Print Detailed Audit (A4)</button>
             <button class="btn sm primary" onclick="document.getElementById('btnExportObeExcel').click()"><i data-lucide="file-spreadsheet" style="width:14px;height:14px;"></i> Export Excel</button>
@@ -4211,6 +4290,57 @@
       saveState();
       renderGradebook();
       renderTracker();
+    }
+
+    function toggleExpandCol(colKey) {
+      if (!S.expandedCols) S.expandedCols = {};
+      S.expandedCols[colKey] = !S.expandedCols[colKey];
+      saveState();
+      renderGradebook();
+    }
+
+    function updateSubQuestionMark(courseId, stuIndex, colKey, segId, qIndex, valStr) {
+      const c = getActiveSemester().courses.find(x => x.id === courseId);
+      if (!c) return;
+
+      if (!c.obe) c.obe = {};
+      if (!c.obe.questionMarks) c.obe.questionMarks = {};
+      if (!c.obe.questionMarks[stuIndex]) c.obe.questionMarks[stuIndex] = {};
+
+      if (!segId) {
+        let seg = c.obe.segments && c.obe.segments.find(s => s.source === 'col:' + colKey);
+        if (!seg) {
+          const col = c.gradebook.cols.find(k => k.k === colKey);
+          seg = { id: 'seg_' + colKey, name: col ? col.l : 'Assessment', fullMark: col ? col.max : 30, nQuestions: 3, source: 'col:' + colKey };
+          if (!c.obe.segments) c.obe.segments = [];
+          c.obe.segments.push(seg);
+        }
+        segId = seg.id;
+      }
+
+      const seg = c.obe.segments && c.obe.segments.find(s => s.id === segId);
+      const nq = seg ? (seg.nQuestions || 1) : 3;
+      if (!c.obe.questionMarks[stuIndex][segId]) {
+        c.obe.questionMarks[stuIndex][segId] = Array(nq).fill(null);
+      }
+
+      const v = (valStr || '').trim();
+      const num = v === '' ? null : parseFloat(v);
+      c.obe.questionMarks[stuIndex][segId][qIndex] = isNaN(num) ? null : num;
+
+      // Real-time auto-sum up to Gradebook cell
+      const qArr = c.obe.questionMarks[stuIndex][segId];
+      const hasAny = qArr.some(x => x !== null && !isNaN(x));
+      if (hasAny) {
+        const sum = qArr.reduce((a, b) => a + (parseFloat(b) || 0), 0);
+        c.gradebook.students[stuIndex].m[colKey] = Math.round(sum * 2) / 2;
+      } else {
+        delete c.gradebook.students[stuIndex].m[colKey];
+      }
+
+      saveState();
+      renderGradebook();
+      if (currentTab === 'tab-obe') renderObeMarksTable(c);
     }
 
     function updateStudentField(courseId, stuIndex, field, val) {
@@ -5962,6 +6092,78 @@
       }, 50);
     }
 
+    function cloneGradebookColumn(colKey) {
+      const course = getActiveCourse();
+      if (!course) return;
+      const col = course.gradebook.cols.find(k => k.k === colKey);
+      if (!col) return;
+
+      let newLabel = col.l + ' (Copy)';
+      const numMatch = col.l.match(/^(.*?)(\d+)$/);
+      if (numMatch) {
+        const prefix = numMatch[1];
+        const nextNum = parseInt(numMatch[2]) + 1;
+        newLabel = `${prefix}${nextNum}`;
+      }
+
+      const newColKey = 'c_' + uid();
+      const newCol = {
+        k: newColKey,
+        l: newLabel,
+        max: col.max,
+        g: col.g || ''
+      };
+
+      if (col.questionBreakdown) {
+        newCol.questionBreakdown = JSON.parse(JSON.stringify(col.questionBreakdown));
+      }
+
+      // Clone matching OBE segment if present
+      if (course.obe && course.obe.segments) {
+        const seg = course.obe.segments.find(s => s.source === 'col:' + colKey);
+        if (seg) {
+          const newSegId = 'seg_' + newColKey;
+          const newSeg = {
+            id: newSegId,
+            name: newLabel,
+            fullMark: seg.fullMark,
+            nQuestions: seg.nQuestions,
+            source: 'col:' + newColKey
+          };
+          course.obe.segments.push(newSeg);
+
+          if (course.obe.coMap && course.obe.coMap[seg.id]) {
+            course.obe.coMap[newSegId] = JSON.parse(JSON.stringify(course.obe.coMap[seg.id]));
+          }
+        }
+      }
+
+      const origIndex = course.gradebook.cols.indexOf(col);
+      course.gradebook.cols.splice(origIndex + 1, 0, newCol);
+
+      saveState();
+      renderGradebook();
+      renderGbColumnsEditorList(course);
+      toast(`Cloned "${col.l}" as "${newLabel}" with OBE questions & weights!`);
+    }
+
+    function moveGradebookColumn(colKey, direction) {
+      const course = getActiveCourse();
+      if (!course) return;
+      const idx = course.gradebook.cols.findIndex(k => k.k === colKey);
+      if (idx === -1) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= course.gradebook.cols.length) return;
+
+      const temp = course.gradebook.cols[idx];
+      course.gradebook.cols[idx] = course.gradebook.cols[newIdx];
+      course.gradebook.cols[newIdx] = temp;
+
+      saveState();
+      renderGradebook();
+      renderGbColumnsEditorList(course);
+    }
+
     function deleteGradebookColumn(colKey) {
       const course = getActiveCourse();
       if (!course) return;
@@ -6041,9 +6243,18 @@
                   🎯 ${nq} Question${nq === 1 ? '' : 's'}
                 </span>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <button class="btn sm primary" type="button" onclick="openAddGradebookColModal('${col.k}')" title="Edit Assessment details, question breakdown, and CO mapping" style="display:flex;align-items:center;gap:4px;padding:3px 9px;font-size:11.5px;font-weight:700;">
-                  <i data-lucide="edit-3" style="width:12px;height:12px;"></i> Edit Column
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                <button class="btn sm icon-only" type="button" onclick="moveGradebookColumn('${col.k}', -1)" title="Move Left / Earlier" ${idx === 0 ? 'disabled style="opacity:0.35;cursor:not-allowed;"' : ''} style="width:24px;height:24px;padding:0;">
+                  <i data-lucide="chevron-left" style="width:13px;height:13px;"></i>
+                </button>
+                <button class="btn sm icon-only" type="button" onclick="moveGradebookColumn('${col.k}', 1)" title="Move Right / Later" ${idx === course.gradebook.cols.length - 1 ? 'disabled style="opacity:0.35;cursor:not-allowed;"' : ''} style="width:24px;height:24px;padding:0;">
+                  <i data-lucide="chevron-right" style="width:13px;height:13px;"></i>
+                </button>
+                <button class="btn sm" type="button" onclick="cloneGradebookColumn('${col.k}')" title="Clone column with questions & CO mappings" style="display:flex;align-items:center;gap:3px;padding:3px 7px;font-size:11px;">
+                  <i data-lucide="copy" style="width:11px;height:11px;"></i> Clone
+                </button>
+                <button class="btn sm primary" type="button" onclick="openAddGradebookColModal('${col.k}')" title="Edit Assessment details, question breakdown, and CO mapping" style="display:flex;align-items:center;gap:4px;padding:3px 8px;font-size:11.5px;font-weight:700;">
+                  <i data-lucide="edit-3" style="width:12px;height:12px;"></i> Edit
                 </button>
                 <button class="btn sm danger icon-only" type="button" onclick="deleteGradebookColumn('${col.k}')" title="Delete Column" style="width:26px;height:26px;padding:0;">
                   <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
@@ -6099,7 +6310,1043 @@
     }
 
 
-    
+    // =========================================================
+    // STUDENT 360° PROFILE & CO RADAR
+    // =========================================================
+
+    function generateStudentCoRadarSvg(labels, values, target = 60, width = 280, height = 240) {
+      if (!labels || labels.length === 0) {
+        return '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:12px;">No active Course Outcomes mapped yet.</div>';
+      }
+      
+      if (labels.length < 3) {
+        return `
+          <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;">
+            <line x1="60" y1="20" x2="60" y2="${height - 40}" stroke="#cbd5e1" stroke-width="1"/>
+            <line x1="60" y1="${height - 40}" x2="${width - 20}" y2="${height - 40}" stroke="#cbd5e1" stroke-width="1"/>
+            <line x1="${60 + (width - 90) * (target / 100)}" y1="20" x2="${60 + (width - 90) * (target / 100)}" y2="${height - 40}" stroke="#ef4444" stroke-dasharray="4 3" stroke-width="1.5"/>
+            <text x="${60 + (width - 90) * (target / 100)}" y="16" fill="#ef4444" font-size="9" font-weight="700" text-anchor="middle">Target (${target}%)</text>
+            ${labels.map((lbl, i) => {
+              const val = Math.min(Math.max(values[i] || 0, 0), 100);
+              const barW = (width - 90) * (val / 100);
+              const y = 40 + i * 50;
+              const isPass = val >= target;
+              return `
+                <text x="50" y="${y + 14}" fill="#475569" font-size="11" font-weight="700" text-anchor="end">${lbl}</text>
+                <rect x="60" y="${y}" width="${barW}" height="20" rx="4" fill="${isPass ? '#10b981' : '#f59e0b'}" opacity="0.85"/>
+                <text x="${65 + barW}" y="${y + 14}" fill="#1e293b" font-size="10" font-weight="700">${val.toFixed(1)}%</text>
+              `;
+            }).join('')}
+          </svg>
+        `;
+      }
+
+      const cx = width / 2;
+      const cy = height / 2 + 8;
+      const R = Math.min(width, height) * 0.36;
+      const N = labels.length;
+
+      const getPt = (i, r) => {
+        const angle = (i * 2 * Math.PI / N) - (Math.PI / 2);
+        return {
+          x: cx + r * Math.cos(angle),
+          y: cy + r * Math.sin(angle)
+        };
+      };
+
+      const rings = [0.2, 0.4, 0.6, 0.8, 1.0].map(ratio => {
+        const pts = [];
+        for (let i = 0; i < N; i++) {
+          const p = getPt(i, R * ratio);
+          pts.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+        }
+        return `<polygon points="${pts.join(' ')}" fill="${ratio === 1.0 ? 'rgba(248,250,252,0.6)' : 'none'}" stroke="#cbd5e1" stroke-width="0.75" stroke-dasharray="${ratio < 1.0 ? '2 2' : 'none'}"/>`;
+      }).join('');
+
+      const spokes = labels.map((lbl, i) => {
+        const p = getPt(i, R);
+        const pLabel = getPt(i, R + 18);
+        const val = values[i] !== null && values[i] !== undefined ? values[i] : 0;
+        const isPass = val >= target;
+        return `
+          <line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="#cbd5e1" stroke-width="0.75"/>
+          <text x="${pLabel.x.toFixed(1)}" y="${(pLabel.y + 4).toFixed(1)}" fill="${isPass ? '#15803d' : '#b91c1c'}" font-size="10" font-weight="700" text-anchor="middle">
+            ${lbl} (${val.toFixed(0)}%)
+          </text>
+        `;
+      }).join('');
+
+      const targetPts = [];
+      for (let i = 0; i < N; i++) {
+        const p = getPt(i, R * (target / 100));
+        targetPts.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+      }
+      const targetPoly = `<polygon points="${targetPts.join(' ')}" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+
+      const scorePts = [];
+      const scoreDots = [];
+      for (let i = 0; i < N; i++) {
+        const val = Math.min(Math.max(values[i] || 0, 0), 100);
+        const p = getPt(i, R * (val / 100));
+        scorePts.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+        scoreDots.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"><title>${labels[i]}: ${val.toFixed(1)}%</title></circle>`);
+      }
+      const scorePoly = `<polygon points="${scorePts.join(' ')}" fill="rgba(37,99,235,0.25)" stroke="#2563eb" stroke-width="2"/>`;
+
+      return `
+        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;">
+          <g transform="translate(10, 14)">
+            <rect x="0" y="0" width="12" height="6" fill="rgba(37,99,235,0.3)" stroke="#2563eb" stroke-width="1.5" rx="1"/>
+            <text x="16" y="7" font-size="9" font-weight="600" fill="#475569">Student Score</text>
+            <line x1="95" y1="3" x2="110" y2="3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <text x="114" y="7" font-size="9" font-weight="600" fill="#ef4444">Target (${target}%)</text>
+          </g>
+          ${rings}
+          ${spokes}
+          ${targetPoly}
+          ${scorePoly}
+          ${scoreDots.join('')}
+        </svg>
+      `;
+    }
+
+    function openStudent360Modal(stuIndex) {
+      const course = getActiveCourse();
+      if (!course) return toast('No active course selected');
+      const students = course.gradebook.students || [];
+      const stu = students[stuIndex];
+      if (!stu) return toast('Student not found');
+
+      const fac = getFaculty(course.facultyId);
+      const attRule = getAttRule(course);
+      const totalClasses = course.classes || 14;
+      const attCount = stu.att !== null && stu.att !== undefined ? stu.att : 0;
+      const attPct = totalClasses > 0 ? (attCount / totalClasses) * 100 : 0;
+      const attMark = calculateAttendanceMark(attPct, attRule);
+
+      const R = computeGradebookResults(course);
+      const stuRes = R[stuIndex] || { score: 0, letter: 'F', gpa: 0, hasMarks: false };
+      const graded = R.filter(r => r.hasMarks).sort((a, b) => b.score - a.score);
+      const rankIdx = graded.findIndex(r => r.index === stuIndex);
+      const rankStr = rankIdx >= 0 ? `#${rankIdx + 1} of ${graded.length}` : 'Unranked';
+
+      computeObeResults(course);
+      const obeRes = course.obe.results;
+      const nCO = course.obe.nCO || 4;
+      const activeCI = [...Array(nCO).keys()].filter(c => (obeRes.coMax[c] || 0) > 0);
+      const stuCOPct = (obeRes.stuCOPct && obeRes.stuCOPct[stuIndex]) || [];
+
+      let coPassed = 0;
+      activeCI.forEach(c => {
+        if (stuCOPct[c] !== null && stuCOPct[c] !== undefined && stuCOPct[c] >= obeRes.target) {
+          coPassed++;
+        }
+      });
+
+      const radarLabels = activeCI.map(c => `CO${c + 1}`);
+      const radarValues = activeCI.map(c => stuCOPct[c] !== null && stuCOPct[c] !== undefined ? stuCOPct[c] : 0);
+      const radarSvg = generateStudentCoRadarSvg(radarLabels, radarValues, obeRes.target, 280, 240);
+
+      const cols = course.gradebook.columns || [];
+      const colAverages = {};
+      cols.forEach(col => {
+        const vals = students.map(s => s.m?.[col.k]).filter(v => v !== undefined && v !== null && !isNaN(v) && v !== '');
+        colAverages[col.k] = vals.length ? (vals.reduce((a, b) => a + parseFloat(b), 0) / vals.length) : 0;
+      });
+
+      const body = `
+        <div style="display:flex;flex-direction:column;gap:14px;max-height:75vh;overflow-y:auto;padding-right:4px;">
+          <!-- Header Banner -->
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-alt);padding:14px 16px;border-radius:10px;border:1px solid var(--border);flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;">
+                ${escapeHtml((stu.name || 'S').trim().substring(0, 2).toUpperCase())}
+              </div>
+              <div>
+                <div style="font-size:16px;font-weight:800;color:var(--text);">${escapeHtml(stu.name || 'Unnamed Student')}</div>
+                <div style="font-size:12px;color:var(--text-muted);font-family:monospace;">ID: <b>${escapeHtml(stu.id || 'N/A')}</b> &bull; Intake: <b>${escapeHtml(stu.intake || course.intake)}</b> &bull; Sec: <b>${escapeHtml(course.section || 'A')}</b></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn sm" type="button" onclick="printStudentReportCard(${stuIndex})"><i data-lucide="printer" style="width:13px;height:13px;"></i> Print Transcript (A4)</button>
+              <div style="display:flex;gap:3px;margin-left:6px;">
+                <button class="btn sm" type="button" title="Previous Student" ${stuIndex === 0 ? 'disabled' : ''} onclick="modal.close();openStudent360Modal(${stuIndex - 1})"><i data-lucide="chevron-left" style="width:13px;height:13px;"></i></button>
+                <button class="btn sm" type="button" title="Next Student" ${stuIndex >= students.length - 1 ? 'disabled' : ''} onclick="modal.close();openStudent360Modal(${stuIndex + 1})"><i data-lucide="chevron-right" style="width:13px;height:13px;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI Strip -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
+            <div class="card" style="padding:10px;text-align:center;background:var(--card-bg);">
+              <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Final Score</div>
+              <div style="font-size:18px;font-weight:800;color:var(--brand);">${numFmt(stuRes.score)} / 100</div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center;background:var(--card-bg);">
+              <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Grade / GPA</div>
+              <div style="font-size:18px;font-weight:800;color:${stuRes.letter === 'F' ? 'var(--danger)' : 'var(--success)'};">${stuRes.letter} <span style="font-size:13px;font-weight:600;">(${stuRes.gpa.toFixed(2)})</span></div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center;background:var(--card-bg);">
+              <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Cohort Rank</div>
+              <div style="font-size:16px;font-weight:800;color:var(--accent);">${rankStr}</div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center;background:var(--card-bg);">
+              <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Attendance</div>
+              <div style="font-size:16px;font-weight:800;">${attPct.toFixed(0)}% <span style="font-size:11px;color:var(--text-muted);">(${attMark}/${attRule.max})</span></div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center;background:var(--card-bg);">
+              <div style="font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">OBE Attainment</div>
+              <div style="font-size:16px;font-weight:800;color:${coPassed === activeCI.length && activeCI.length > 0 ? 'var(--success)' : (coPassed > 0 ? 'var(--warning)' : 'var(--danger)')};">
+                ${activeCI.length > 0 ? `${coPassed} / ${activeCI.length} Met` : 'N/A'}
+              </div>
+            </div>
+          </div>
+
+          <!-- Two Column Content: Marks vs OBE Radar -->
+          <div style="display:grid;grid-template-columns:1.2fr 0.9fr;gap:14px;align-items:start;">
+            <!-- Marks Breakdown Table -->
+            <div class="card" style="padding:12px;background:var(--card-bg);">
+              <h4 style="font-size:12px;font-weight:700;margin-bottom:8px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;">
+                <span>Assessment Components</span>
+                <span style="font-size:10px;font-weight:normal;">Course Scale: ${course.scale || 100}</span>
+              </h4>
+              <div style="overflow-x:auto;">
+                <table style="width:100%;font-size:11.5px;border-collapse:collapse;">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--border);color:var(--text-muted);text-align:left;">
+                      <th style="padding:6px 4px;">Item</th>
+                      <th style="padding:6px 4px;text-align:center;">Max</th>
+                      <th style="padding:6px 4px;text-align:right;">Scored</th>
+                      <th style="padding:6px 4px;text-align:right;">Class Avg</th>
+                      <th style="padding:6px 4px;text-align:center;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border);">
+                      <td style="padding:6px 4px;font-weight:600;">Attendance (${attCount}/${totalClasses})</td>
+                      <td style="padding:6px 4px;text-align:center;">${attRule.max}</td>
+                      <td style="padding:6px 4px;text-align:right;font-weight:700;">${attMark}</td>
+                      <td style="padding:6px 4px;text-align:right;color:var(--text-muted);">—</td>
+                      <td style="padding:6px 4px;text-align:center;"><span class="badge ${attPct >= 75 ? 'success' : 'warning'}" style="font-size:9.5px;">${attPct >= 75 ? 'Regular' : 'Irregular'}</span></td>
+                    </tr>
+                    ${cols.map(col => {
+                      const val = stu.m?.[col.k];
+                      const numVal = parseFloat(val);
+                      const hasVal = !isNaN(numVal);
+                      const avg = colAverages[col.k] || 0;
+                      const isAbove = hasVal && numVal >= avg;
+                      
+                      const qCount = col.q || 0;
+                      let subRows = '';
+                      if (qCount > 0 && course.obe.questionMarks && course.obe.questionMarks[stuIndex] && course.obe.questionMarks[stuIndex][col.k]) {
+                        const qArr = course.obe.questionMarks[stuIndex][col.k];
+                        const weights = col.qWeights || [];
+                        const qSubList = [];
+                        for (let qi = 0; qi < qCount; qi++) {
+                          const qm = qArr[qi];
+                          const qw = weights[qi] || (col.m / qCount);
+                          const coMapObj = course.obe.coMap?.[col.k]?.[qi];
+                          const coLbl = coMapObj ? `CO${coMapObj.co + 1}` : '—';
+                          qSubList.push(`<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:10.5px;color:var(--text-muted);"><span style="margin-left:12px;">↳ Q${qi + 1} (${coLbl}):</span><span class="mono">${qm !== undefined && qm !== null && qm !== '' ? qm : '0'} / ${qw}</span></div>`);
+                        }
+                        subRows = qSubList.join('');
+                      }
+
+                      return `
+                        <tr style="border-bottom:1px solid var(--border);">
+                          <td style="padding:6px 4px;">
+                            <div style="font-weight:600;">${escapeHtml(col.l)}</div>
+                            ${subRows}
+                          </td>
+                          <td style="padding:6px 4px;text-align:center;">${col.m}</td>
+                          <td style="padding:6px 4px;text-align:right;font-weight:700;">${hasVal ? numVal : '—'}</td>
+                          <td style="padding:6px 4px;text-align:right;color:var(--text-muted);">${avg ? avg.toFixed(1) : '—'}</td>
+                          <td style="padding:6px 4px;text-align:center;">
+                            ${hasVal ? `<span class="badge ${isAbove ? 'success' : 'neutral'}" style="font-size:9.5px;">${isAbove ? '≥ Avg' : '< Avg'}</span>` : '<span class="badge danger" style="font-size:9.5px;">Missing</span>'}
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- OBE Outcome Radar & Competencies -->
+            <div class="card" style="padding:12px;background:var(--card-bg);">
+              <h4 style="font-size:12px;font-weight:700;margin-bottom:8px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;">
+                <span>Outcome Attainment Radar</span>
+                <span style="font-size:10px;font-weight:normal;color:var(--brand);">Benchmark: ${obeRes.target}%</span>
+              </h4>
+              <div style="background:var(--bg-alt);border-radius:8px;padding:8px 4px;border:1px solid var(--border);margin-bottom:10px;">
+                ${radarSvg}
+              </div>
+
+              <!-- CO List Progress -->
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                ${activeCI.map(c => {
+                  const pct = stuCOPct[c];
+                  const hasPct = pct !== null && pct !== undefined;
+                  const isMet = hasPct && pct >= obeRes.target;
+                  const displayPct = hasPct ? pct.toFixed(1) : '0';
+                  return `
+                    <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+                      <span style="width:36px;font-weight:700;">CO${c + 1}</span>
+                      <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.min(hasPct ? pct : 0, 100)}%;background:${isMet ? 'var(--success)' : 'var(--danger)'};border-radius:4px;"></div>
+                      </div>
+                      <span class="mono" style="width:45px;text-align:right;font-weight:700;color:${isMet ? 'var(--success)' : 'var(--danger)'};">${displayPct}%</span>
+                      <span class="badge ${isMet ? 'success' : 'danger'}" style="font-size:9px;padding:1px 5px;">${isMet ? 'Met' : 'Unmet'}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      openModal({
+        title: `Student 360° Profile: ${escapeHtml(stu.id || '')} — ${escapeHtml(stu.name || '')}`,
+        bodyHtml: body,
+        okText: 'Close',
+        onConfirm: () => true
+      });
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function printStudentReportCard(stuIndex) {
+      const course = getActiveCourse();
+      if (!course) return toast('Select a course first');
+      const students = course.gradebook.students || [];
+      const stu = students[stuIndex];
+      if (!stu) return toast('Student not found');
+
+      const sem = getActiveSemester();
+      const fac = getFaculty(course.facultyId);
+      const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+      const logo = S.institution && S.institution.logo;
+
+      const attRule = getAttRule(course);
+      const totalClasses = course.classes || 14;
+      const attCount = stu.att !== null && stu.att !== undefined ? stu.att : 0;
+      const attPct = totalClasses > 0 ? (attCount / totalClasses) * 100 : 0;
+      const attMark = calculateAttendanceMark(attPct, attRule);
+
+      const R = computeGradebookResults(course);
+      const stuRes = R[stuIndex] || { score: 0, letter: 'F', gpa: 0, hasMarks: false };
+      const graded = R.filter(r => r.hasMarks).sort((a, b) => b.score - a.score);
+      const rankIdx = graded.findIndex(r => r.index === stuIndex);
+      const rankStr = rankIdx >= 0 ? `#${rankIdx + 1} of ${graded.length}` : 'Unranked';
+
+      computeObeResults(course);
+      const obeRes = course.obe.results;
+      const nCO = course.obe.nCO || 4;
+      const activeCI = [...Array(nCO).keys()].filter(c => (obeRes.coMax[c] || 0) > 0);
+      const stuCOPct = (obeRes.stuCOPct && obeRes.stuCOPct[stuIndex]) || [];
+
+      let coPassed = 0;
+      activeCI.forEach(c => {
+        if (stuCOPct[c] !== null && stuCOPct[c] !== undefined && stuCOPct[c] >= obeRes.target) {
+          coPassed++;
+        }
+      });
+
+      const radarLabels = activeCI.map(c => `CO${c + 1}`);
+      const radarValues = activeCI.map(c => stuCOPct[c] !== null && stuCOPct[c] !== undefined ? stuCOPct[c] : 0);
+      const radarSvg = generateStudentCoRadarSvg(radarLabels, radarValues, obeRes.target, 280, 210);
+
+      const cols = course.gradebook.columns || [];
+
+      let html = `
+        <div class="print-page">
+          <!-- Institutional Header -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;border-bottom:2px solid #1a3c6e;padding-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              ${logo ? `<img src="${logo}" style="max-height:50px;max-width:90px;object-fit:contain;">` : ''}
+              <div>
+                <div style="font-size:14pt;font-weight:800;color:#1a3c6e;">${escapeHtml(S.institution.university || 'BUBT')}</div>
+                <div style="font-size:9.5pt;font-weight:600;color:#475569;">${escapeHtml(S.institution.department || '')}</div>
+                <div style="font-size:8.5pt;color:#1e40af;font-weight:700;margin-top:2px;">
+                  STUDENT ACADEMIC PERFORMANCE & OUTCOME ATTAINMENT TRANSCRIPT
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right;font-size:8pt;color:#94a3b8;font-family:monospace;">
+              Generated: ${dateStr}<br>
+              Semester: ${escapeHtml(sem.name)}
+            </div>
+          </div>
+
+          <!-- Student Profile Grid -->
+          <div style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:8.5pt;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:18%;color:#64748b;"><b>Student Name:</b></td>
+                <td style="width:32%;font-weight:800;color:#0f172a;">${escapeHtml(stu.name || 'N/A')}</td>
+                <td style="width:18%;color:#64748b;"><b>Course Title:</b></td>
+                <td style="width:32%;font-weight:700;color:#0f172a;">${escapeHtml(course.title)}</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b;"><b>Student ID:</b></td>
+                <td style="font-family:monospace;font-weight:800;color:#1e40af;">${escapeHtml(stu.id || 'N/A')}</td>
+                <td style="color:#64748b;"><b>Course Code:</b></td>
+                <td style="font-weight:700;color:#0f172a;">${escapeHtml(course.code)} (${course.type === 'L' ? 'Lab' : 'Theory'})</td>
+              </tr>
+              <tr>
+                <td style="color:#64748b;"><b>Intake / Section:</b></td>
+                <td>${escapeHtml(stu.intake || course.intake)} &bull; Sec ${escapeHtml(course.section || 'A')}</td>
+                <td style="color:#64748b;"><b>Course Faculty:</b></td>
+                <td>${escapeHtml(fac.name)} (${escapeHtml(fac.designation || 'Faculty')})</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- KPI Summary Strip -->
+          <div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px;">
+            <div class="kpi-print"><div class="v">${numFmt(stuRes.score)}</div><div class="l">Final Score / 100</div></div>
+            <div class="kpi-print"><div class="v">${stuRes.letter}</div><div class="l">Grade (GPA ${stuRes.gpa.toFixed(2)})</div></div>
+            <div class="kpi-print"><div class="v">${rankStr}</div><div class="l">Cohort Rank</div></div>
+            <div class="kpi-print"><div class="v">${attPct.toFixed(0)}%</div><div class="l">Attendance (${attMark}/${attRule.max})</div></div>
+            <div class="kpi-print"><div class="v">${activeCI.length > 0 ? `${coPassed}/${activeCI.length}` : '—'}</div><div class="l">COs Attained (≥${obeRes.target}%)</div></div>
+          </div>
+
+          <!-- Continuous Marks Breakdown -->
+          <div class="p-section">
+            <h3>1. Continuous Assessment & Final Marks Itemization</h3>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th class="left">Assessment Component</th>
+                  <th>Component Max</th>
+                  <th>Student Score</th>
+                  <th>Score %</th>
+                  <th>Assessment Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="left"><b>Attendance & Class Participation</b> (${attCount} / ${totalClasses} classes attended)</td>
+                  <td>${attRule.max}</td>
+                  <td style="font-weight:800;">${attMark}</td>
+                  <td>${attPct.toFixed(1)}%</td>
+                  <td><span class="${attPct >= 75 ? 'tag-y' : 'tag-n'}">${attPct >= 75 ? 'Regular (≥75%)' : 'Irregular'}</span></td>
+                </tr>
+                ${cols.map(col => {
+                  const val = stu.m?.[col.k];
+                  const hasVal = val !== undefined && val !== null && !isNaN(parseFloat(val));
+                  const numVal = hasVal ? parseFloat(val) : 0;
+                  const pct = col.m > 0 ? (numVal / col.m) * 100 : 0;
+                  return `
+                    <tr>
+                      <td class="left"><b>${escapeHtml(col.l)}</b></td>
+                      <td>${col.m}</td>
+                      <td style="font-weight:800;">${hasVal ? numVal : '—'}</td>
+                      <td>${hasVal ? pct.toFixed(1) + '%' : '—'}</td>
+                      <td>${hasVal ? (pct >= 60 ? '<span class="tag-y">Satisfactory</span>' : '<span class="tag-n">Needs Improvement</span>') : '<span class="tag-n">Unrecorded</span>'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+                <tr style="background:#f8fafc;font-weight:800;">
+                  <td class="left">FINAL SCALED AGGREGATE</td>
+                  <td>100</td>
+                  <td style="font-size:9pt;color:#1e40af;">${numFmt(stuRes.score)}</td>
+                  <td>${numFmt(stuRes.score)}%</td>
+                  <td><span class="${stuRes.letter === 'F' ? 'tag-n' : 'tag-y'}">Grade: ${stuRes.letter} (${stuRes.gpa.toFixed(2)})</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- OBE Outcomes Attainment & Radar -->
+          <div class="p-section">
+            <h3>2. BAETE Outcome-Based Education (OBE) Competency Attainment</h3>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="flex:1;">
+                <table class="print-table">
+                  <thead>
+                    <tr>
+                      <th>Course Outcome</th>
+                      <th>Max Marks</th>
+                      <th>Benchmark</th>
+                      <th>Student Attainment %</th>
+                      <th>Compliance Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${activeCI.map(c => {
+                      const pct = stuCOPct[c];
+                      const hasPct = pct !== null && pct !== undefined;
+                      const isMet = hasPct && pct >= obeRes.target;
+                      return `
+                        <tr>
+                          <td><b>CO${c + 1}</b></td>
+                          <td>${(obeRes.coMax[c] || 0).toFixed(0)}</td>
+                          <td>${obeRes.target}%</td>
+                          <td style="font-weight:800;">${hasPct ? pct.toFixed(1) + '%' : '—'}</td>
+                          <td><span class="${isMet ? 'tag-y' : 'tag-n'}">${isMet ? 'Attained' : 'Below Target'}</span></td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+              <div style="width:280px;text-align:center;">
+                <div style="font-size:7.5pt;font-weight:700;color:#1a3c6e;margin-bottom:3px;">Student CO Competency Radar</div>
+                ${radarSvg}
+              </div>
+            </div>
+          </div>
+
+          <!-- Formal Attestation Signatures -->
+          <div class="signature-block">
+            <table>
+              <tr>
+                <td style="width:30%;padding-top:20px;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Course Teacher Signature</div>
+                  <div style="font-size:8.5pt;font-weight:700;">${escapeHtml(fac.name)}</div>
+                </td>
+                <td style="width:5%;"></td>
+                <td style="width:30%;padding-top:20px;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Student Acknowledgment</div>
+                  <div style="font-size:8.5pt;font-weight:700;">Signature / Date</div>
+                </td>
+                <td style="width:5%;"></td>
+                <td style="width:30%;padding-top:20px;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Head of Department / Advisor</div>
+                  <div style="font-size:8.5pt;font-weight:700;">Official Endorsement</div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      `;
+
+      triggerSystemPrint(html);
+    }
+
+    // =========================================================
+    // MASTER COURSE ASSESSMENT PORTFOLIO (5-PAGE COMPILATION)
+    // =========================================================
+
+    function printCompleteCoursePortfolio(course) {
+      if (!course) course = getActiveCourse();
+      if (!course) return toast('Select a course first');
+
+      const sem = getActiveSemester();
+      const fac = getFaculty(course.facultyId);
+      const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+      const logo = S.institution && S.institution.logo;
+
+      // Gradebook analysis
+      const R = computeGradebookResults(course);
+      const graded = R.filter(r => r.hasMarks);
+      const nGraded = graded.length;
+      const totalStudents = course.gradebook.students.length;
+      const avgScore = nGraded ? graded.reduce((a, b) => a + b.score, 0) / nGraded : 0;
+      const highestScore = nGraded ? Math.max(...graded.map(r => r.score)) : 0;
+      const lowestScore = nGraded ? Math.min(...graded.map(r => r.score)) : 0;
+      const failed = graded.filter(r => r.letter === 'F').length;
+      const passed = nGraded - failed;
+      const passRate = nGraded ? ((passed / nGraded) * 100) : 0;
+
+      // Grade distribution
+      const dist = {};
+      GRADES_TABLE.forEach(g => dist[g[1]] = 0);
+      graded.forEach(r => dist[r.letter]++);
+
+      // OBE computation
+      computeObeResults(course);
+      const res = course.obe.results;
+      const nCO = course.obe.nCO || 4;
+      const nPO = course.obe.nPO || 12;
+      const activeCI = [...Array(nCO).keys()].filter(c => (res.coMax[c] || 0) > 0);
+      const activePI = [...Array(nPO).keys()].filter(p => res.poAttain[p] !== null);
+      const charts = generateObePrintCharts(activeCI, activePI, res);
+
+      // CQI Analysis
+      const passedCOs = activeCI.filter(c => (res.coAttain[c] || 0) >= res.target);
+      const riskCOs = activeCI.filter(c => (res.coAttain[c] || 0) < res.target);
+
+      const attRule = getAttRule(course);
+      const totalClasses = course.classes || 14;
+      const cols = course.gradebook.columns || [];
+
+      let html = `
+        <!-- ================= PAGE 1: COVER PAGE & COURSE PROFILE ================= -->
+        <div class="print-page" style="display:flex;flex-direction:column;justify-content:space-between;min-height:98vh;">
+          <div>
+            <div style="text-align:center;margin-top:20px;margin-bottom:30px;">
+              ${logo ? `<img src="${logo}" style="max-height:80px;max-width:160px;object-fit:contain;margin-bottom:12px;">` : ''}
+              <div style="font-size:18pt;font-weight:900;color:#1a3c6e;letter-spacing:0.5px;">${escapeHtml(S.institution.university || 'BANGLADESH UNIVERSITY OF BUSINESS & TECHNOLOGY')}</div>
+              <div style="font-size:12pt;font-weight:700;color:#475569;margin-top:4px;">${escapeHtml(S.institution.department || 'FACULTY OF ENGINEERING & APPLIED SCIENCES')}</div>
+              <div style="width:120px;height:3px;background:#2563eb;margin:16px auto;"></div>
+              <div style="font-size:15pt;font-weight:800;color:#1e3a8a;margin-top:10px;">
+                COMPREHENSIVE COURSE ASSESSMENT &amp; ACCREDITATION PORTFOLIO
+              </div>
+              <div style="font-size:10pt;color:#64748b;margin-top:4px;">
+                Outcome-Based Education (OBE) Audit &bull; BAETE / Washington Accord Criterion 3 &amp; 4
+              </div>
+            </div>
+
+            <!-- Course Identification Card -->
+            <div style="border:2px solid #1a3c6e;border-radius:8px;padding:16px 20px;margin:20px auto;max-width:92%;background:#f8fafc;">
+              <div style="font-size:11pt;font-weight:800;color:#1a3c6e;border-bottom:1.5px solid #cbd5e1;padding-bottom:6px;margin-bottom:12px;text-transform:uppercase;">
+                Course Identification &amp; Offering Information
+              </div>
+              <table style="width:100%;font-size:9.5pt;border-collapse:collapse;line-height:1.6;">
+                <tr>
+                  <td style="width:25%;color:#64748b;"><b>Course Title:</b></td>
+                  <td style="width:40%;font-weight:800;color:#0f172a;">${escapeHtml(course.title)}</td>
+                  <td style="width:15%;color:#64748b;"><b>Course Code:</b></td>
+                  <td style="width:20%;font-family:monospace;font-weight:800;color:#1e40af;">${escapeHtml(course.code)}</td>
+                </tr>
+                <tr>
+                  <td style="color:#64748b;"><b>Course Type:</b></td>
+                  <td>${course.type === 'L' ? 'Laboratory / Sessional' : 'Theory (Lecture-based)'}</td>
+                  <td style="color:#64748b;"><b>Credit Hours:</b></td>
+                  <td>${course.credits || (course.type === 'L' ? '1.50' : '3.00')} Credits</td>
+                </tr>
+                <tr>
+                  <td style="color:#64748b;"><b>Academic Semester:</b></td>
+                  <td><b>${escapeHtml(sem.name)}</b></td>
+                  <td style="color:#64748b;"><b>Program:</b></td>
+                  <td>${course.program === 'R' ? 'B.Sc. Engg. (Day / Regular)' : 'B.Sc. Engg. (Evening)'}</td>
+                </tr>
+                <tr>
+                  <td style="color:#64748b;"><b>Intake &amp; Section:</b></td>
+                  <td>${escapeHtml(course.intake)} &bull; Section ${escapeHtml(course.section || 'A')}</td>
+                  <td style="color:#64748b;"><b>Enrolled Students:</b></td>
+                  <td><b>${totalStudents}</b> Students</td>
+                </tr>
+                <tr>
+                  <td style="color:#64748b;"><b>Course Faculty:</b></td>
+                  <td><b>${escapeHtml(fac.name)}</b></td>
+                  <td style="color:#64748b;"><b>Designation:</b></td>
+                  <td>${escapeHtml(fac.designation || 'Course Instructor')}</td>
+                </tr>
+                <tr>
+                  <td style="color:#64748b;"><b>Faculty Code / Email:</b></td>
+                  <td>${escapeHtml(fac.code || '—')} &bull; ${escapeHtml(fac.email || '—')}</td>
+                  <td style="color:#64748b;"><b>Classes Held:</b></td>
+                  <td>${totalClasses} Classes</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Portfolio Index -->
+            <div style="border:1px solid #cbd5e1;border-radius:8px;padding:14px 20px;margin:20px auto;max-width:92%;background:#fff;">
+              <div style="font-size:10pt;font-weight:800;color:#1a3c6e;margin-bottom:8px;">
+                Dossier Contents &amp; Evaluation Structure
+              </div>
+              <table style="width:100%;font-size:8.5pt;border-collapse:collapse;">
+                <tr style="border-bottom:1px solid #f1f5f9;padding:4px 0;"><td style="font-weight:700;width:30px;">§ 1</td><td>Course Identification, Description &amp; Contact Attribution</td><td style="text-align:right;font-family:monospace;">Page 1</td></tr>
+                <tr style="border-bottom:1px solid #f1f5f9;padding:4px 0;"><td style="font-weight:700;">§ 2</td><td>Course Outcomes (CO) Blueprint &amp; 16 Milestones Deliverables Compliance</td><td style="text-align:right;font-family:monospace;">Page 2</td></tr>
+                <tr style="border-bottom:1px solid #f1f5f9;padding:4px 0;"><td style="font-weight:700;">§ 3</td><td>Consolidated Student Gradebook Marks Sheet &amp; GPA Distribution Analytics</td><td style="text-align:right;font-family:monospace;">Page 3</td></tr>
+                <tr style="border-bottom:1px solid #f1f5f9;padding:4px 0;"><td style="font-weight:700;">§ 4</td><td>BAETE Outcome-Based Education (OBE) Attainment Matrices &amp; Competency Charts</td><td style="text-align:right;font-family:monospace;">Page 4</td></tr>
+                <tr style="padding:4px 0;"><td style="font-weight:700;">§ 5</td><td>Continuous Quality Improvement (CQI) Action Plan &amp; 4-Party Accreditations</td><td style="text-align:right;font-family:monospace;">Page 5</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bottom Footer -->
+          <div style="text-align:center;border-top:1px solid #cbd5e1;padding-top:8px;font-size:8pt;color:#94a3b8;font-family:monospace;margin-bottom:10px;">
+            Accreditation Record &bull; Generated: ${dateStr} &bull; Document Ref: BUBT-OBE-PORTFOLIO-${escapeHtml(course.code).replace(/\s+/g, '')}
+          </div>
+        </div>
+
+        <!-- ================= PAGE 2: CO BLUEPRINT & 16 MILESTONES ================= -->
+        <div class="print-page">
+          ${getObeHeaderHTML(course)}
+          <div style="font-size:11pt;font-weight:800;color:#1a3c6e;text-align:center;margin-bottom:8px;border-bottom:1px solid #cbd5e1;padding-bottom:3px;">
+            SECTION 2: COURSE OUTCOMES (CO) BLUEPRINT &amp; 16 DELIVERABLES COMPLIANCE
+          </div>
+
+          <!-- CO Blueprint -->
+          <div class="p-section">
+            <h3>Course Learning Outcomes (COs) &amp; Assessment Weightage</h3>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th style="width:45px;">CO #</th>
+                  <th class="left">Course Outcome Statement</th>
+                  <th>Assessment Components</th>
+                  <th>Allocated Marks</th>
+                  <th>Benchmark</th>
+                  <th>Linked POs</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${activeCI.map(c => {
+                  const maxM = res.coMax[c] || 0;
+                  const linkedPOs = activePI.filter(p => (course.obe.copo?.[c]?.[p] || 0) > 0).map(p => `PO${p + 1}`).join(', ') || '—';
+                  const segs = (course.obe.segments || []).filter(seg => {
+                    const qCount = seg.questions ? seg.questions.length : (seg.q || 0);
+                    for (let qi = 0; qi < qCount; qi++) {
+                      if (course.obe.coMap?.[seg.id]?.[qi]?.co === c) return true;
+                    }
+                    return false;
+                  }).map(s => s.name).join(', ') || 'Direct Assessment';
+                  return `
+                    <tr>
+                      <td><b>CO${c + 1}</b></td>
+                      <td class="left" style="font-size:7.5pt;">Attain proficiency in core course concepts, analysis &amp; engineering design principles for CO${c + 1}.</td>
+                      <td style="font-size:7.5pt;">${escapeHtml(segs)}</td>
+                      <td style="font-weight:700;">${maxM.toFixed(1)}</td>
+                      <td>${res.target}%</td>
+                      <td style="font-size:7.5pt;font-weight:600;color:#1e40af;">${linkedPOs}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Assessment Components Breakdown -->
+          <div class="p-section">
+            <h3>Assessment Scheme &amp; Weightage Configuration</h3>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th class="left">Assessment Tool</th>
+                  <th>Max Marks</th>
+                  <th>Scaled Weight</th>
+                  <th>Questions</th>
+                  <th>Mapped COs</th>
+                  <th>Evaluation Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="left"><b>Attendance &amp; Class Participation</b></td>
+                  <td>${attRule.max}</td>
+                  <td>${attRule.max}%</td>
+                  <td>14 Classes</td>
+                  <td>Overall</td>
+                  <td>Continuous (Weeks 1–14)</td>
+                </tr>
+                ${cols.map(col => {
+                  const qCount = col.q || 0;
+                  const mappedCOs = [];
+                  if (qCount > 0 && course.obe.coMap?.[col.k]) {
+                    for (let qi = 0; qi < qCount; qi++) {
+                      const cm = course.obe.coMap[col.k][qi];
+                      if (cm && cm.co !== undefined) {
+                        const coTxt = `CO${cm.co + 1}`;
+                        if (!mappedCOs.includes(coTxt)) mappedCOs.push(coTxt);
+                      }
+                    }
+                  }
+                  return `
+                    <tr>
+                      <td class="left"><b>${escapeHtml(col.l)}</b></td>
+                      <td>${col.m}</td>
+                      <td>${col.w || col.m}%</td>
+                      <td>${qCount > 0 ? `${qCount} questions` : 'Aggregate'}</td>
+                      <td style="font-weight:700;color:#1e40af;">${mappedCOs.join(', ') || '—'}</td>
+                      <td>Scheduled Assessment</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 16 Milestones Deliverables Compliance -->
+          <div class="p-section">
+            <h3>16 Milestones Deliverables Compliance Checklist</h3>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th style="width:30px;">#</th>
+                  <th class="left">Departmental Deliverable / Milestone</th>
+                  <th>Stage</th>
+                  <th>Compliance Status</th>
+                  <th>Verification Mode</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${S.trackerColumns.map((milestone, idx) => {
+                  const st = course.tracker?.[milestone.id] || 'pending';
+                  let symbol = 'Pending';
+                  let cls = 'tag-n';
+                  if (st === 'done') { symbol = 'COMPLETED ✔'; cls = 'tag-y'; }
+                  else if (st === 'skip') { symbol = 'EXEMPTED / N/A'; cls = 'tag-n'; }
+                  return `
+                    <tr>
+                      <td>${idx + 1}</td>
+                      <td class="left"><b>${escapeHtml(milestone.name)}</b></td>
+                      <td style="font-size:7.5pt;color:#64748b;">Academic Deliverable</td>
+                      <td><span class="${cls}">${symbol}</span></td>
+                      <td style="font-size:7.5pt;color:#64748b;">Faculty &amp; Dept Records</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 3: GRADEBOOK MARKS & GPA DISTRIBUTION ================= -->
+        <div class="print-page">
+          ${getObeHeaderHTML(course)}
+          <div style="font-size:11pt;font-weight:800;color:#1a3c6e;text-align:center;margin-bottom:8px;border-bottom:1px solid #cbd5e1;padding-bottom:3px;">
+            SECTION 3: CONSOLIDATED STUDENT GRADEBOOK &amp; GPA DISTRIBUTION
+          </div>
+
+          <!-- Cohort KPI Summary -->
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;flex-wrap:wrap;">
+            <div class="kpi-print"><div class="v">${totalStudents}</div><div class="l">Total Enrolled</div></div>
+            <div class="kpi-print"><div class="v">${nGraded}</div><div class="l">Evaluated</div></div>
+            <div class="kpi-print"><div class="v">${numFmt(avgScore)}</div><div class="l">Class Average</div></div>
+            <div class="kpi-print"><div class="v">${numFmt(highestScore)}</div><div class="l">Highest Mark</div></div>
+            <div class="kpi-print"><div class="v">${numFmt(lowestScore)}</div><div class="l">Lowest Mark</div></div>
+            <div class="kpi-print"><div class="v">${passRate.toFixed(1)}%</div><div class="l">Pass Rate</div></div>
+          </div>
+
+          <!-- Grade Frequency Table -->
+          <div class="p-section" style="margin-bottom:8px;">
+            <h3>Academic Grade &amp; GPA Distribution Summary</h3>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  ${GRADES_TABLE.map(g => `<th>${g[1]}<br><small>(${g[2].toFixed(2)})</small></th>`).join('')}
+                  <th>Total Graded</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  ${GRADES_TABLE.map(g => {
+                    const cnt = dist[g[1]] || 0;
+                    const pct = nGraded ? ((cnt / nGraded) * 100).toFixed(0) : 0;
+                    return `<td style="font-weight:700;${g[1] === 'F' && cnt > 0 ? 'color:#b91c1c;' : ''}">${cnt}<br><small style="color:#64748b;">${pct}%</small></td>`;
+                  }).join('')}
+                  <td style="font-weight:800;font-size:9pt;color:#1e40af;">${nGraded}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Student Marks Roster -->
+          <div class="p-section">
+            <h3>Student Continuous Assessment &amp; Final Marks Sheet</h3>
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th style="width:26px;">#</th>
+                  <th class="left" style="width:90px;">Student ID</th>
+                  <th class="left">Student Name</th>
+                  <th>Att<br><small>/${attRule.max}</small></th>
+                  ${cols.map(col => `<th>${escapeHtml(col.l)}<br><small>/${col.m}</small></th>`).join('')}
+                  <th>Total<br><small>/100</small></th>
+                  <th>Grade</th>
+                  <th>GPA</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${course.gradebook.students.map((stu, si) => {
+                  const r = R[si] || { score: 0, letter: 'F', gpa: 0, hasMarks: false };
+                  const attC = stu.att !== null && stu.att !== undefined ? stu.att : 0;
+                  const attP = totalClasses > 0 ? (attC / totalClasses) * 100 : 0;
+                  const attM = calculateAttendanceMark(attP, attRule);
+                  return `
+                    <tr>
+                      <td>${si + 1}</td>
+                      <td class="left" style="font-family:monospace;font-size:7pt;">${escapeHtml(stu.id)}</td>
+                      <td class="left" style="font-size:7.5pt;">${escapeHtml(stu.name)}</td>
+                      <td>${attM}</td>
+                      ${cols.map(col => {
+                        const m = stu.m?.[col.k];
+                        const hasM = m !== undefined && m !== null && m !== '';
+                        return `<td>${hasM ? m : '—'}</td>`;
+                      }).join('')}
+                      <td style="font-weight:800;color:#1e40af;">${numFmt(r.score)}</td>
+                      <td style="font-weight:800;${r.letter === 'F' ? 'color:#b91c1c;' : ''}">${r.letter}</td>
+                      <td>${r.gpa.toFixed(2)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 4: OBE ATTAINMENT MATRICES & CHARTS ================= -->
+        <div class="print-page">
+          ${getObeHeaderHTML(course)}
+          <div style="font-size:11pt;font-weight:800;color:#1a3c6e;text-align:center;margin-bottom:8px;border-bottom:1px solid #cbd5e1;padding-bottom:3px;">
+            SECTION 4: BAETE / WASHINGTON ACCORD OBE ATTAINMENT MATRICES
+          </div>
+          ${getObeKPISummaryHTML(res, totalStudents, activeCI, activePI)}
+
+          <!-- CO Attainment Table -->
+          ${getObeCOAttainmentTable(res, nCO, course.gradebook.students, res.stuCOPct)}
+
+          <!-- CO Visual Charts -->
+          <div class="chart-print-wrap">
+            <div style="display:flex;gap:16px;justify-content:center;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px;text-align:center;">Course Outcome (CO) Radar Profile</div>
+                <img src="${charts.coRadar}" width="250" style="max-width:250px;">
+              </div>
+              <div>
+                <div style="font-size:8pt;font-weight:700;color:#1a3c6e;margin-bottom:3px;text-align:center;">CO Attainment vs Benchmark (${res.target}%)</div>
+                <img src="${charts.coBar}" width="310" style="max-width:310px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- PO Attainment Table -->
+          ${getObePOAttainmentTable(res, nPO, course.obe.copo, nCO)}
+
+          <!-- PO Visual Charts -->
+          <div class="chart-print-wrap">
+            <div style="display:flex;gap:16px;justify-content:center;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px;text-align:center;">Program Outcome (PO) Radar Profile</div>
+                <img src="${charts.poRadar}" width="250" style="max-width:250px;">
+              </div>
+              <div>
+                <div style="font-size:8pt;font-weight:700;color:#15803d;margin-bottom:3px;text-align:center;">PO Attainment vs Benchmark (${res.target}%)</div>
+                <img src="${charts.poBar}" width="310" style="max-width:310px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 5: CQI ACTION PLAN & 4-PARTY SIGNATURES ================= -->
+        <div class="print-page" style="display:flex;flex-direction:column;justify-content:space-between;min-height:98vh;">
+          <div>
+            ${getObeHeaderHTML(course)}
+            <div style="font-size:11pt;font-weight:800;color:#1a3c6e;text-align:center;margin-bottom:8px;border-bottom:1px solid #cbd5e1;padding-bottom:3px;">
+              SECTION 5: CONTINUOUS QUALITY IMPROVEMENT (CQI) ACTION PLAN &amp; ATTESTATIONS
+            </div>
+
+            <!-- CQI Assessment Observations -->
+            <div class="p-section">
+              <h3>1. Faculty Evaluation &amp; Cohort Performance Analysis</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th style="width:25%;" class="left">Evaluation Metric</th>
+                    <th class="left">Observed Cohort Standing</th>
+                    <th class="left">Academic Compliance &amp; BAETE Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="left"><b>CO Benchmark Compliance</b></td>
+                    <td class="left"><b>${passedCOs.length} of ${activeCI.length} COs</b> met the target threshold of ${res.target}%</td>
+                    <td class="left"><span class="${riskCOs.length === 0 ? 'tag-y' : 'tag-n'}">${riskCOs.length === 0 ? 'Full Accreditation Benchmark Satisfied' : 'Remedial Action Required for Deficient COs'}</span></td>
+                  </tr>
+                  <tr>
+                    <td class="left"><b>Primary Cohort Strengths</b></td>
+                    <td class="left">${passedCOs.length > 0 ? passedCOs.map(c => `CO${c + 1} (${(res.coAttain[c] || 0).toFixed(1)}%)`).join(', ') : 'Basic comprehension developed'}</td>
+                    <td class="left">Strong engagement in continuous assessments, tutorials and regular attendance.</td>
+                  </tr>
+                  <tr>
+                    <td class="left"><b>Deficiencies / Vulnerabilities</b></td>
+                    <td class="left">${riskCOs.length > 0 ? riskCOs.map(c => `CO${c + 1} (${(res.coAttain[c] || 0).toFixed(1)}% < ${res.target}%)`).join(', ') : 'No critical outcome deficiencies identified'}</td>
+                    <td class="left">${riskCOs.length > 0 ? 'Special focus required on analytical and design question segments.' : 'Target cohort attained expected learning outcomes.'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- CQI Action Plan -->
+            <div class="p-section">
+              <h3>2. Continuous Quality Improvement (CQI) Action Plan for Next Semester Offering</h3>
+              <table class="print-table">
+                <thead>
+                  <tr>
+                    <th style="width:30px;">#</th>
+                    <th style="width:24%;" class="left">CQI Focus Domain</th>
+                    <th class="left">Identified Area for Enhancement</th>
+                    <th class="left">Planned Corrective Action &amp; Implementation Strategy</th>
+                    <th style="width:18%;">Responsible Party</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td class="left"><b>Curriculum Delivery &amp; Pedagogy</b></td>
+                    <td class="left">${riskCOs.length > 0 ? `Reinforce complex topics linked to ${riskCOs.map(c => 'CO' + (c + 1)).join(', ')}` : 'Maintain active learning &amp; case-study discussions'}</td>
+                    <td class="left">Incorporate practical demonstrations, animated visualizations, and dedicated tutorial problem-solving sessions before class tests.</td>
+                    <td>Course Teacher / Coordinator</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td class="left"><b>Assessment Question Moderation</b></td>
+                    <td class="left">Calibration of question difficulty &amp; Bloom's taxonomy distribution</td>
+                    <td class="left">Ensure questions are balanced between foundational knowledge and higher-order engineering problem solving (Apply, Analyze, Evaluate).</td>
+                    <td>Department Moderation Board</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td class="left"><b>Remedial Student Support</b></td>
+                    <td class="left">Assistance for academically struggling students (${failed} failed / ${passRate.toFixed(0)}% pass rate)</td>
+                    <td class="left">Schedule remedial mentoring hours and provide supplemental practice question banks with step-by-step model solutions.</td>
+                    <td>Faculty &amp; Academic Advisors</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td class="left"><b>Laboratory &amp; Computing Tools</b></td>
+                    <td class="left">Hands-on application and tool exposure</td>
+                    <td class="left">Integrate modern industry software packages and laboratory experimentation to reinforce theoretical concepts.</td>
+                    <td>Lab Instructor / Dept Head</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Formal 4-Party Accreditations & Signatures Block -->
+          <div class="signature-block" style="margin-top:20px;border-top:2px solid #1a3c6e;padding-top:14px;">
+            <div style="font-size:9pt;font-weight:800;color:#1a3c6e;margin-bottom:12px;text-align:center;text-transform:uppercase;">
+              Official 4-Party Course Accreditation Attestations &amp; Endorsement
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:23%;padding-top:24px;vertical-align:bottom;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Prepared by</div>
+                  <div style="font-size:8.5pt;font-weight:800;color:#0f172a;">${escapeHtml(fac.name)}</div>
+                  <div style="font-size:7.5pt;color:#64748b;">Course Instructor</div>
+                </td>
+                <td style="width:2%;"></td>
+                <td style="width:23%;padding-top:24px;vertical-align:bottom;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Verified by</div>
+                  <div style="font-size:8.5pt;font-weight:800;color:#0f172a;">Course Coordinator</div>
+                  <div style="font-size:7.5pt;color:#64748b;">Module Leadership</div>
+                </td>
+                <td style="width:2%;"></td>
+                <td style="width:23%;padding-top:24px;vertical-align:bottom;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Reviewed &amp; Approved by</div>
+                  <div style="font-size:8.5pt;font-weight:800;color:#0f172a;">Department Chairman</div>
+                  <div style="font-size:7.5pt;color:#64748b;">Dept. of Civil Engineering</div>
+                </td>
+                <td style="width:2%;"></td>
+                <td style="width:23%;padding-top:24px;vertical-align:bottom;">
+                  <div class="signature-line"></div>
+                  <div style="font-size:7.5pt;color:#64748b;">Endorsed for Accreditation</div>
+                  <div style="font-size:8.5pt;font-weight:800;color:#0f172a;">Dean of Faculty / IQAC</div>
+                  <div style="font-size:7.5pt;color:#64748b;">BUBT Accreditation Cell</div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      `;
+
+      triggerSystemPrint(html);
+    }
+
+
     function openInstitutionModal() {
       let logoData = (S.institution && S.institution.logo) || '';
       const body = `
@@ -7171,6 +8418,10 @@
             <button class="btn" onclick="generateSemesterSummaryPdf();modal.close();" style="justify-content:flex-start;padding:12px;">
               <i data-lucide="file-text" style="width:16px;height:16px;color:var(--accent);"></i>
               <div><b>Semester Summary PDF Report (.pdf)</b><br><small class="dim">Executive department overview with all courses & pass rates.</small></div>
+            </button>
+            <button class="btn" onclick="printCompleteCoursePortfolio();modal.close();" style="justify-content:flex-start;padding:12px;">
+              <i data-lucide="file-check" style="width:16px;height:16px;color:var(--brand);"></i>
+              <div><b>Course Accreditation Portfolio Dossier (A4)</b><br><small class="dim">Master 5-page dossier: Syllabus, COs, 16 Milestones, Gradebook, OBE matrices & CQI.</small></div>
             </button>
           </div>
         `;
